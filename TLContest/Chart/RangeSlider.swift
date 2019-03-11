@@ -1,13 +1,13 @@
 //
 //  RangeSlider.swift
-//  CustomSliderExample
+//  TLContest
 //
-//  Created by William Archimede on 04/09/2014.
-//  Copyright (c) 2014 HoodBrains. All rights reserved.
+//  Created by Alexander Shoshiashvili on 11/03/2019.
+//  Copyright © 2019 dd-team. All rights reserved.
 //
 
+
 import UIKit
-import QuartzCore
 
 class RangeSliderTrackLayer: CALayer {
     weak var rangeSlider: RangeSlider?
