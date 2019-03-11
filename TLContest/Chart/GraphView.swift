@@ -41,8 +41,6 @@ class GraphView: UIView {
     var yIntervals: CGFloat = 6
     let xIntervals: CGFloat = 6
     
-    var xMargin: CGFloat = 20
-    
     required init(coder: NSCoder) {
         fatalError("NSCoding not supported")
     }
@@ -72,7 +70,7 @@ class GraphView: UIView {
         
         // Graph size
         graphWidth = rect.size.width
-        graphHeight = rect.size.height - padding
+        graphHeight = rect.size.height
         axisWidth = rect.size.width
         axisHeight = rect.size.height - padding
         
@@ -143,7 +141,7 @@ class GraphView: UIView {
                     interval = graphWidth / elements
                 }
                 
-                let xPosition = CGFloat(index) * interval + xMargin
+                let xPosition = CGFloat(index) * interval
                 let title = dateFormatters.format(date: x)
                 let xLabel = axisLabel(title: title)
                 xLabel.frame = CGRect(x: xPosition - interval / 2.0, y: graphHeight + 20, width: interval, height: 20)
@@ -159,10 +157,10 @@ class GraphView: UIView {
             
             let pointPath = CGMutablePath()
             let initialY: CGFloat = ceil((CGFloat(yAxis.values[0]) * (axisHeight / everest)))
-            let initialX = xMargin
+            let initialX: CGFloat = 0
             pointPath.move(to: CGPoint(x: initialX, y: graphHeight - initialY))
             
-            for value in zip(xAxis, yAxis.values) {
+            for value in zip(xAxis, yAxis.values).dropFirst() {
                 plotPoint(point: (value.0, value.1), path: pointPath)
             }
             
@@ -177,7 +175,7 @@ class GraphView: UIView {
         let interval: CGFloat
             
         if showFull {
-            interval = graphWidth / CGFloat(xAxis.count)
+            interval = graphWidth / CGFloat(xAxis.count - 1)
         } else {
             interval = graphWidth / xIntervals
         }
@@ -189,7 +187,7 @@ class GraphView: UIView {
             pointIndex = index
         }
         
-        let xPosition = CGFloat(pointIndex) * interval + xMargin
+        let xPosition = CGFloat(pointIndex) * interval
         
         path.addLine(to: CGPoint(x: xPosition, y: graphHeight - yPosition))
     }

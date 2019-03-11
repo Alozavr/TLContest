@@ -40,9 +40,9 @@ class RangeSliderTrackLayer: CALayer {
         // bottom line
         let lowerLine = CGMutablePath()
         lowerLine.move(to: CGPoint(x: lowerValuePosition,
-                              y: bounds.height - 2))
+                              y: bounds.height))
         lowerLine.addLine(to: CGPoint(x: upperValuePosition,
-                                 y: bounds.height - 2))
+                                 y: bounds.height))
         ctx.addPath(lowerLine)
         ctx.setLineWidth(2)
         ctx.setStrokeColor(UIColor(hexString: "CDCFDF").withAlphaComponent(0.8).cgColor)
