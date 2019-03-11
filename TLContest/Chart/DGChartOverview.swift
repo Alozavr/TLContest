@@ -12,7 +12,7 @@ class DGChartOverview: UIView {
      var lineViews = [LineView]()
     
     func displayChart(_ chart: Chart) {
-        let lineView = GraphView(frame: bounds, xAxis: chart.dateAxis, yAxises: chart.lines)
+        let lineView = GraphView(frame: bounds, chart: chart)
         lineView.showXLabels = false
         lineView.showYLabels = false
         lineView.showLines = false
