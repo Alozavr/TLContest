@@ -154,8 +154,6 @@ class GraphView: UIView {
         
         // Draw graph for each Line object
         for yAxis in yAxises {
-            var yAxis = yAxis
-            yAxis.values = yAxis.values.reversed()
             self.yAxis = yAxis
             self.graphColor = yAxis.color
             

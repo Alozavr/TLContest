@@ -24,17 +24,31 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .white
         
-        let overview = DGChartOverview(frame: .zero)
+        let rangeSlider = RangeSlider(frame: .zero)
+        
+        let overview = DGChartOverview(frame: rangeSlider.bounds)
+        overview.translatesAutoresizingMaskIntoConstraints = false
+        overview.backgroundColor = UIColor.white
+        
         view.addSubview(overview)
         
-        overview.translatesAutoresizingMaskIntoConstraints = false
-        overview.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        overview.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        overview.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
+        overview.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
         overview.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         overview.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        overview.heightAnchor.constraint(equalToConstant: 200).isActive = true
+        overview.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        
+        view.addSubview(rangeSlider)
+        
+        rangeSlider.translatesAutoresizingMaskIntoConstraints = false
+        rangeSlider.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
+        rangeSlider.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
+        rangeSlider.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        rangeSlider.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        rangeSlider.heightAnchor.constraint(equalToConstant: 100).isActive = true
         
         overview.displayChart(chart)
+        
     }
     
     func registerCells() {
