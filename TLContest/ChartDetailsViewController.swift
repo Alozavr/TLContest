@@ -25,8 +25,19 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
         
         let overview = DGChartOverview(frame: .zero)
         overview.translatesAutoresizingMaskIntoConstraints = false
+        overview.layer.borderColor = UIColor.green.cgColor
+        overview.layer.borderWidth = 1.0
+        view.addSubview(overview)
         
+        NSLayoutConstraint.activate([
+                overview.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                overview.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+                overview.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+                overview.heightAnchor.constraint(equalToConstant: 60)
+            ])
         
+        view.bringSubviewToFront(overview)
+        overview.displayChart(chart)
     }
     
     func registerCells() {

@@ -11,8 +11,10 @@ import UIKit
 class LineView: UIView {
 
     let line: Line
+    let xAxisShifts: [CGFloat]
     
-    init(frame: CGRect, line: Line) {
+    init(frame: CGRect, line: Line, xAxisShifts: [CGFloat]) {
+        self.xAxisShifts = xAxisShifts
         self.line = line
         super.init(frame: frame)
     }
@@ -29,8 +31,13 @@ class LineView: UIView {
         let startingPoint = CGPoint(x: 0, y: rect.size.height - lineWidth)
         let endingPoint = CGPoint(x: rect.size.width, y: rect.size.height - lineWidth)
         context.move(to: startingPoint )
-        context.addLine(to: endingPoint )
+        for (i, value) in line.values.enumerated() {
+            context.addLine(to: endingPoint )
+        }
         context.strokePath()
+        
+        context.setFillColor(UIColor.clear.cgColor)
+        context.fill(rect)
     }
  
 
