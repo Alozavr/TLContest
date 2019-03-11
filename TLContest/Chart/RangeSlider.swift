@@ -199,6 +199,10 @@ public class RangeSlider: UIControl {
             lowerThumbLayer.highlighted = true
         } else if upperThumbLayer.frame.contains(previousLocation) {
             upperThumbLayer.highlighted = true
+        } else if trackLayer.frame.contains(previousLocation) {
+            lowerThumbLayer.highlighted = true
+            upperThumbLayer.highlighted = true
+            return true
         }
         
         return lowerThumbLayer.highlighted || upperThumbLayer.highlighted
@@ -218,7 +222,10 @@ public class RangeSlider: UIControl {
         previousLocation = location
         
         // Update the values
-        if lowerThumbLayer.highlighted {
+        if lowerThumbLayer.highlighted, upperThumbLayer.highlighted {
+            lowerValue = boundValue(lowerValue + deltaValue, toLowerValue: minimumValue, upperValue: upperValue - gapBetweenThumbs)
+            upperValue = boundValue(upperValue + deltaValue, toLowerValue: lowerValue + gapBetweenThumbs, upperValue: maximumValue)
+        } else if lowerThumbLayer.highlighted {
             lowerValue = boundValue(lowerValue + deltaValue, toLowerValue: minimumValue, upperValue: upperValue - gapBetweenThumbs)
         } else if upperThumbLayer.highlighted {
             upperValue = boundValue(upperValue + deltaValue, toLowerValue: lowerValue + gapBetweenThumbs, upperValue: maximumValue)
