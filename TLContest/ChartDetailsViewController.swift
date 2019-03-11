@@ -22,11 +22,19 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
         super.viewDidLoad()
         createTableView()
         tableView.isScrollEnabled = false
+        tableView.backgroundColor = .white
         
         let overview = DGChartOverview(frame: .zero)
+        view.addSubview(overview)
+        
         overview.translatesAutoresizingMaskIntoConstraints = false
+        overview.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        overview.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        overview.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        overview.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        overview.heightAnchor.constraint(equalToConstant: 200).isActive = true
         
-        
+        overview.displayChart(chart)
     }
     
     func registerCells() {

@@ -8,12 +8,6 @@
 
 import UIKit
 
-struct Line {
-    let name: String
-    let values: [Int]
-    let color: UIColor
-}
-
 struct Chart {
     let dateAxis: [Date]
     let lines: [Line]

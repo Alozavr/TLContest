@@ -12,12 +12,12 @@ class DGChartOverview: UIView {
      var lineViews = [LineView]()
     
     func displayChart(_ chart: Chart) {
-        for line in chart.lines {
-            let lineView = LineView(frame: self.bounds, line: line)
-            lineView.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(lineView)
-            lineView.bindToSuperView()
-        }
+        let lineView = GraphView(frame: bounds, xAxis: chart.dateAxis, yAxises: chart.lines)
+        lineView.showXLabels = false
+        lineView.showFull = true
+        lineView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(lineView)
+        lineView.bindToSuperView()
     }
     
 }
