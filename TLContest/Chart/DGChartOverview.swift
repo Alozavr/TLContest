@@ -14,6 +14,8 @@ class DGChartOverview: UIView {
     func displayChart(_ chart: Chart) {
         let lineView = GraphView(frame: bounds, xAxis: chart.dateAxis, yAxises: chart.lines)
         lineView.showXLabels = false
+        lineView.showYLabels = false
+        lineView.showLines = false
         lineView.showFull = true
         lineView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(lineView)

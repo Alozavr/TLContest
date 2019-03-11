@@ -30,6 +30,7 @@ class GraphView: UIView {
     var showFull = false
     var showLines = true
     var showPoints = false
+    var showYLabels = true
     var showXLabels = true
     var linesColor: UIColor = UIColor(hexString: "CDCFDF")
     var graphColor: UIColor = .black
@@ -91,35 +92,38 @@ class GraphView: UIView {
         context.strokePath()
         
         let yIntervals: CGFloat = 6
-        // Draw y axis labels and lines
         let yLabelInterval = Int(everest / yIntervals)
-        for i in 0..<Int(yIntervals) {
-            
-            let y = floor((rect.size.height - padding) - CGFloat(i) * (axisHeight / yIntervals))
-            let labelHeight: CGFloat = 20.0
-            let inset: CGFloat = 8.0
-            
-            let label = axisLabel(title: String(format: "%d", i * yLabelInterval), alignment: .left)
-            label.frame = CGRect(x: inset,
-                                 y: y - labelHeight,
-                                 width: 40,
-                                 height: labelHeight)
-            addSubview(label)
-            
-            
-            if (showLines) {
-                let line = CGMutablePath()
-                line.move(to: CGPoint(x: padding,
-                                      y: y))
-                line.addLine(to: CGPoint(x: axisWidth,
-                                         y: y))
-                context.addPath(line)
-                context.setLineWidth(1)
-                context.setStrokeColor(linesColor.cgColor)
-                context.strokePath()
+        
+        if showYLabels || showLines {
+            for i in 0..<Int(yIntervals) {
+                let y = floor((rect.size.height - padding) - CGFloat(i) * (axisHeight / yIntervals))
+                
+                if showYLabels {
+                    let labelHeight: CGFloat = 20.0
+                    let inset: CGFloat = 8.0
+                    
+                    let label = axisLabel(title: String(format: "%d", i * yLabelInterval), alignment: .left)
+                    label.frame = CGRect(x: inset,
+                                         y: y - labelHeight,
+                                         width: 40,
+                                         height: labelHeight)
+                    addSubview(label)
+                }
+                
+                if showLines {
+                    let line = CGMutablePath()
+                    line.move(to: CGPoint(x: padding,
+                                          y: y))
+                    line.addLine(to: CGPoint(x: axisWidth,
+                                             y: y))
+                    context.addPath(line)
+                    context.setLineWidth(1)
+                    context.setStrokeColor(linesColor.cgColor)
+                    context.strokePath()
+                }
             }
         }
-        
+            
         if showXLabels {
             for (index, x) in xAxis.enumerated() {
                 let interval: CGFloat
