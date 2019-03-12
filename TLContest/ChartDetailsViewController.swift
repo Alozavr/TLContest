@@ -21,7 +21,10 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
     override func viewDidLoad() {
         super.viewDidLoad()
         createTableView()
+        tableView.isScrollEnabled = false
+        tableView.backgroundColor = .white
         title = "Statistics"
+
     }
     
     func registerCells() {

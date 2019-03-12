@@ -10,7 +10,7 @@ import UIKit
 
 class ChartOverviewCell: UITableViewCell {
     
-    weak var chartView: ChartView!
+    weak var chartView: ChartOverview!
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -24,7 +24,7 @@ class ChartOverviewCell: UITableViewCell {
 
     private func initChart() {
         selectionStyle = .none
-        let chartView = ChartView()
+        let chartView = ChartOverview()
         chartView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(chartView)
         chartView.bindToSuperView()
