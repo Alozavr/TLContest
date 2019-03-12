@@ -10,7 +10,7 @@ import UIKit
 
 class DGChartOverview: UIView {
     
-    weak var sliderView: RangeSlider!
+    weak var sliderView: DGRangeSlider!
     weak var sliderLeadingConstraint: NSLayoutConstraint!
     weak var sliderTrailingConstraint: NSLayoutConstraint!
     let sliderViewCornerRadius: CGFloat = 5

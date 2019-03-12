@@ -8,7 +8,7 @@
 
 import UIKit
 
-class RangeSlider: UIView {
+class DGRangeSlider: UIView {
     
     weak var leftToggle: UIView!
     weak var rightToggle: UIView!
