@@ -16,7 +16,7 @@ class GraphView: UIView {
     private var xAxis: [Date] = []
     private var yAxises: [Line] = []
     
-    private var yAxis: Line = Line(name: "", values: [], color: .clear, isVisible: true)
+    private var yAxis: Line = Line(id: UUID().uuidString, name: "", values: [], color: .clear, isVisible: true)
     
     private let padding: CGFloat = 8.0
     private var graphWidth: CGFloat = 0

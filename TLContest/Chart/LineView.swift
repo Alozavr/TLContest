@@ -10,7 +10,7 @@ import UIKit
 
 class LineView: UIView {
 
-    let line: Line
+    var line: Line
     let coefficients: [(x: CGFloat, y: CGFloat)]
     
     init(frame: CGRect, line: Line, coefficients: [(x: CGFloat, y: CGFloat)]) {
