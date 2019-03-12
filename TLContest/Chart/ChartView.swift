@@ -12,12 +12,6 @@ class ChartView: UIView {
     
     var xAxisCoefficients: [CGFloat] = []
     
-//    func setLineVisible(newLine: Line) {
-//        guard let view = subviews.first(where: { ($0 as? LineView)?.line.id == newLine.id }) as? LineView else { return }
-//        view.line = newLine
-//        view.isHidden = !newLine.isVisible
-//    }
-    
     func refresh(chart: Chart) {
         let viewsToRemove = subviews.compactMap { (subView) -> LineView? in
             guard let lineView = subView as? LineView else { return nil }
@@ -25,6 +19,21 @@ class ChartView: UIView {
                 return nil
             }
             return lineView
+        }
+        
+        let lines = chart.lines.filter { $0.isVisible }
+        let joinedYValues = lines.reduce([], { $0 + $1.values.map({ CGFloat($0) })})
+        guard let max = joinedYValues.max(), let min = joinedYValues.min() else { return }
+        
+        for line in lines {
+            let lineCoefficients = line.values.map({ CGFloat($0) }).map({ CGFloat( ($0 - min) / (max - min) ) })
+            guard lineCoefficients.count == xAxisCoefficients.count else { continue }
+            let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
+            guard let view = subviews.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
+                createLineView(line: line, coefficients: coefficients)
+                continue
+            }
+            view.coefficients = coefficients
         }
         
         UIView.animate(withDuration: 0.3, animations: {
@@ -37,6 +46,13 @@ class ChartView: UIView {
             }
         }
         
+    }
+    
+    func createLineView(line: Line, coefficients: [(x: CGFloat, y: CGFloat)]) {
+        let lineView = LineView(frame: self.bounds, line: line, coefficients: coefficients)
+        lineView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(lineView)
+        lineView.bindToSuperView(with: UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 0))
     }
 
     
@@ -54,10 +70,7 @@ class ChartView: UIView {
             let lineCoefficients = line.values.map({ CGFloat($0) }).map({ CGFloat( ($0 - min) / (max - min) ) })
             guard lineCoefficients.count == xAxisCoefficients.count else { continue }
             let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
-            let lineView = LineView(frame: self.bounds, line: line, coefficients: coefficients)
-            lineView.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(lineView)
-            lineView.bindToSuperView()
+            createLineView(line: line, coefficients: coefficients)
         }
     }
 

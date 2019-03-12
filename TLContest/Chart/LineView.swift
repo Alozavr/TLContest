@@ -10,14 +10,22 @@ import UIKit
 
 class LineView: UIView {
 
+    var oldPath: UIBezierPath?
+    let shapeLayer = CAShapeLayer()
     var line: Line
-    let coefficients: [(x: CGFloat, y: CGFloat)]
+    var coefficients: [(x: CGFloat, y: CGFloat)] {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
     
     init(frame: CGRect, line: Line, coefficients: [(x: CGFloat, y: CGFloat)]) {
         self.coefficients = coefficients
         self.line = line
         super.init(frame: frame)
         backgroundColor = .clear
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        self.layer.addSublayer(shapeLayer)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -25,18 +33,37 @@ class LineView: UIView {
     }
     
     override func draw(_ rect: CGRect) {
-        guard let context = UIGraphicsGetCurrentContext() else { return }
+//        guard let context = UIGraphicsGetCurrentContext() else { return }
+        shapeLayer.frame = rect
+        let path = UIBezierPath()
         let lineWidth: CGFloat = 1.0
         let points = coefficients.map({ CGPoint(x: $0 * rect.width, y: rect.height - $1 * rect.height) })
         
-        context.setLineWidth(lineWidth)
-        context.setStrokeColor(line.color.cgColor)
+        path.lineWidth = lineWidth
+        shapeLayer.strokeColor = line.color.cgColor
+        
         let startingPoint = CGPoint(x: 0, y: rect.size.height - lineWidth)
-        context.move(to: startingPoint )
+        path.move(to: startingPoint )
         for (i, _) in line.values.enumerated() {
-            context.addLine(to: points[i] )
+            path.addLine(to: points[i] )
         }
-        context.strokePath()
+        guard let previousPath = oldPath else {
+            oldPath = path
+            shapeLayer.path = path.cgPath
+            return
+        }
+        CATransaction.begin()
+        CATransaction.setCompletionBlock({ [weak self] in
+            self?.oldPath = path
+            self?.shapeLayer.path = path.cgPath
+        })
+        let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.path))
+        pathAnimation.fromValue = previousPath.cgPath
+        pathAnimation.toValue = path.cgPath
+        pathAnimation.duration = 0.3
+        shapeLayer.add(pathAnimation, forKey:"animationKey")
+        CATransaction.commit()
+        
     }
  
 
