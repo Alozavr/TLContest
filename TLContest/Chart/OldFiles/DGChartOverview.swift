@@ -72,7 +72,7 @@ class DGChartOverview: UIView {
     }
     
     private func setupSlider() {
-        let slider = RangeSlider()
+        let slider = DGRangeSlider()
         slider.translatesAutoresizingMaskIntoConstraints = false
         addSubview(slider)
         slider.toggleWidth = 15
@@ -82,9 +82,9 @@ class DGChartOverview: UIView {
         sliderView.clipsToBounds = true
 
         setupSliderRecognizers()
-        guard let leading = constraints.first(where: { $0.firstItem is RangeSlider && $0.firstAttribute == .leading }) else { return }
+        guard let leading = constraints.first(where: { $0.firstItem is DGRangeSlider && $0.firstAttribute == .leading }) else { return }
         sliderLeadingConstraint = leading
-        guard let trailing = constraints.first(where: { $0.firstItem is RangeSlider && $0.firstAttribute == .trailing }) else { return }
+        guard let trailing = constraints.first(where: { $0.firstItem is DGRangeSlider && $0.firstAttribute == .trailing }) else { return }
         sliderTrailingConstraint = trailing
         
     }

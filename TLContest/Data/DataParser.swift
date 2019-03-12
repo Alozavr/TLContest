@@ -106,7 +106,7 @@ class DataParser {
                 }
                 guard let colorString = element.colors[lineName] else { return nil }
                 let color = UIColor.colorWith(hexString: colorString)
-                return Line(name: lineName, values: linePositions, color: color)
+                return Line(name: lineName, values: linePositions, color: color, isVisible: true)
             }.compactMap({ $0 })
             guard lines.count > 0 else { return nil }
             return Chart.init(dateAxis: dates, lines: lines)

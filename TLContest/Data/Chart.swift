@@ -12,6 +12,7 @@ struct Line {
     let name: String
     let values: [Int]
     let color: UIColor
+    let isVisible: Bool
 }
 
 struct Chart {
