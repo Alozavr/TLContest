@@ -9,7 +9,11 @@
 import UIKit
 
 class ChartView: UIView {
-
+    
+    func hideLine(named: String) {
+        
+    }
+    
     func displayChart(_ chart: Chart) {
         guard let lastDate = chart.dateAxis.last?.timeIntervalSince1970,
             let firstDate = chart.dateAxis.first?.timeIntervalSince1970 else { return }
