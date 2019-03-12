@@ -93,6 +93,8 @@ class GraphView: UIView {
         
         // clean up
         subviews.forEach({ $0.removeFromSuperview() })
+        layer.sublayers?.forEach({ $0.removeFromSuperlayer() })
+        
         everest = 0
         
         if lowerBoundIndex == 0, upperBoundIndex == 0 {
@@ -127,13 +129,14 @@ class GraphView: UIView {
                     let labelHeight: CGFloat = 20.0
                     let inset: CGFloat = 8.0
                     
-                    let label = axisLabel(title: String(format: "%d", i * yLabelInterval), alignment: .left)
-                    label.backgroundColor = .clear
-                    label.frame = CGRect(x: inset,
+                    let labelFrame = CGRect(x: inset,
                                          y: y - labelHeight,
                                          width: 40,
                                          height: labelHeight)
-                    addSubview(label)
+                    
+                    let title = String(format: "%d", i * yLabelInterval)
+                    let textLayer = axisLabel(title: title, frame: labelFrame, alignment: .left)
+                    layer.addSublayer(textLayer)
                 }
                 
                 if showLines {
@@ -164,10 +167,9 @@ class GraphView: UIView {
                 
                 let xPosition = CGFloat(index) * interval
                 let title = dateFormatters.format(date: x)
-                let xLabel = axisLabel(title: title)
-                xLabel.frame = CGRect(x: xPosition - interval / 2.0, y: graphHeight + 20, width: interval, height: 20)
-                xLabel.textAlignment = .center
-                addSubview(xLabel)
+                let labelFrame = CGRect(x: xPosition - interval / 2.0, y: graphHeight + 20, width: interval, height: 20)
+                let xLabel = axisLabel(title: title, frame: labelFrame, alignment: .center)
+                layer.addSublayer(xLabel)
             }
         }
         
@@ -222,14 +224,17 @@ class GraphView: UIView {
         path.addLine(to: CGPoint(x: xPosition, y: graphHeight - yPosition))
     }
     
-    func axisLabel(title: String, alignment: NSTextAlignment = .right) -> UILabel {
-        let label = UILabel(frame: .zero)
-        label.text = title as String
-        label.font = labelFont
-        label.textColor = labelTextColor
-        label.backgroundColor = backgroundColor
-        label.textAlignment = alignment
-        return label
+    func axisLabel(title: String, frame: CGRect, alignment: CATextLayerAlignmentMode = .right) -> CATextLayer {
+        let textLayer = CATextLayer()
+        textLayer.frame = frame
+        textLayer.foregroundColor = UIColor(hexString: "abafb4").cgColor
+        textLayer.backgroundColor = UIColor.clear.cgColor
+        textLayer.alignmentMode = .left
+        textLayer.contentsScale = UIScreen.main.scale
+        textLayer.font = CTFontCreateWithName(labelFont.fontName as CFString, 0, nil)
+        textLayer.fontSize = labelFont.pointSize
+        textLayer.string = title
+        return textLayer
     }
     
     func getFilteredYAxisValues(_ yAxis: Line) -> [Int] {

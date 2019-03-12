@@ -28,12 +28,12 @@ class RangeSliderTrackLayer: CALayer {
         ctx.fill(rect)
         
         // color for backround before left thumb
-        ctx.setFillColor(UIColor(hexString: "CDCFDF").withAlphaComponent(0.5).cgColor)
+        ctx.setFillColor(UIColor(hexString: "f6f8fa").withAlphaComponent(0.7).cgColor)
         let lowerRect = CGRect(x: 0, y: 0.0, width: lowerValuePosition, height: bounds.height)
         ctx.fill(lowerRect)
         
         // color for backround after right thumb
-        ctx.setFillColor(UIColor(hexString: "CDCFDF").withAlphaComponent(0.5).cgColor)
+        ctx.setFillColor(UIColor(hexString: "f6f8fa").withAlphaComponent(0.7).cgColor)
         let upperRect = CGRect(x: upperValuePosition, y: 0.0, width: bounds.width - upperValuePosition, height: bounds.height)
         ctx.fill(upperRect)
         
@@ -45,7 +45,7 @@ class RangeSliderTrackLayer: CALayer {
                                  y: bounds.height))
         ctx.addPath(lowerLine)
         ctx.setLineWidth(2)
-        ctx.setStrokeColor(UIColor(hexString: "CDCFDF").withAlphaComponent(0.8).cgColor)
+        ctx.setStrokeColor(UIColor(hexString: "cbd3dd").withAlphaComponent(0.8).cgColor)
         ctx.strokePath()
         
         // up line
@@ -56,7 +56,7 @@ class RangeSliderTrackLayer: CALayer {
                                       y: 0))
         ctx.addPath(upperLine)
         ctx.setLineWidth(2)
-        ctx.setStrokeColor(UIColor(hexString: "CDCFDF").withAlphaComponent(0.8).cgColor)
+        ctx.setStrokeColor(UIColor(hexString: "cbd3dd").withAlphaComponent(0.8).cgColor)
         ctx.strokePath()
         
     }
@@ -80,11 +80,12 @@ class RangeSliderThumbLayer: CALayer {
         }
     }
     
-    var strokeColor = UIColor(hexString: "CDCFDF").withAlphaComponent(0.9) {
+    var strokeColor = UIColor(hexString: "cbd3dd").withAlphaComponent(0.8) {
         didSet {
             setNeedsDisplay()
         }
     }
+    
     var lineWidth: CGFloat = 0.5 {
         didSet {
             setNeedsDisplay()
@@ -103,18 +104,21 @@ class RangeSliderThumbLayer: CALayer {
     override func draw(in ctx: CGContext) {
         
         let corners: UIRectCorner
+        let arrowDirectionCoeff: CGFloat
         
         switch direction {
         case .left:
             corners = [.bottomLeft, .topLeft]
+            arrowDirectionCoeff = 1
         case .right:
             corners = [.topRight, .bottomRight]
+            arrowDirectionCoeff = -1
         }
         
         let thumbPath = UIBezierPath(roundedRect: bounds, byRoundingCorners: corners, cornerRadii: CGSize(width: 4.0, height: 4.0))
         
         // Fill
-        ctx.setFillColor(UIColor(hexString: "CDCFDF").withAlphaComponent(0.8).cgColor)
+        ctx.setFillColor(UIColor(hexString: "cbd3dd").withAlphaComponent(0.8).cgColor)
         ctx.addPath(thumbPath.cgPath)
         ctx.fillPath()
         
@@ -129,6 +133,23 @@ class RangeSliderThumbLayer: CALayer {
             ctx.addPath(thumbPath.cgPath)
             ctx.fillPath()
         }
+        
+        // arrow
+        let arrowSize: CGFloat = 8.0
+        let diffByX = (bounds.width - arrowDirectionCoeff * bounds.width) / 2.0
+        let startOrEndPointX = bounds.origin.x + diffByX + arrowSize * (3/2) * arrowDirectionCoeff
+        let originYPlusHeight = bounds.origin.y + bounds.height / 2.0
+        
+        ctx.move(to: CGPoint(x: startOrEndPointX,
+                             y: originYPlusHeight - arrowSize * arrowDirectionCoeff))
+        ctx.addLine(to: CGPoint(x: bounds.origin.x + arrowSize / 2.0 * arrowDirectionCoeff + diffByX,
+                                y: originYPlusHeight))
+        ctx.addLine(to: CGPoint(x: startOrEndPointX,
+                                y: originYPlusHeight + arrowSize * arrowDirectionCoeff))
+        
+        ctx.setStrokeColor(UIColor.white.cgColor)
+        ctx.setLineWidth(arrowSize / 4.0)
+        ctx.strokePath()
     }
 }
 
