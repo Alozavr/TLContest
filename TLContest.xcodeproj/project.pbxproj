@@ -18,6 +18,8 @@
 		DDE19CC62236397D001E2C31 /* DataParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE19CC52236397D001E2C31 /* DataParser.swift */; };
 		DDE19CC82236773B001E2C31 /* ChartDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE19CC72236773B001E2C31 /* ChartDetailsViewController.swift */; };
 		DDE19CCA22367C8E001E2C31 /* LineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE19CC922367C8E001E2C31 /* LineView.swift */; };
+		DDE19CCC22377176001E2C31 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE19CCB22377176001E2C31 /* ChartView.swift */; };
+		DDE19CCE22377373001E2C31 /* RangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE19CCD22377373001E2C31 /* RangeSlider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +36,8 @@
 		DDE19CC52236397D001E2C31 /* DataParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataParser.swift; sourceTree = "<group>"; };
 		DDE19CC72236773B001E2C31 /* ChartDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDetailsViewController.swift; sourceTree = "<group>"; };
 		DDE19CC922367C8E001E2C31 /* LineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineView.swift; sourceTree = "<group>"; };
+		DDE19CCB22377176001E2C31 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
+		DDE19CCD22377373001E2C31 /* RangeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeSlider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +88,8 @@
 			children = (
 				DDE19CBE22363512001E2C31 /* DGChartOverview.swift */,
 				DDE19CC922367C8E001E2C31 /* LineView.swift */,
+				DDE19CCB22377176001E2C31 /* ChartView.swift */,
+				DDE19CCD22377373001E2C31 /* RangeSlider.swift */,
 			);
 			path = Chart;
 			sourceTree = "<group>";
@@ -174,9 +180,11 @@
 				DDE19CC62236397D001E2C31 /* DataParser.swift in Sources */,
 				DDE19CC82236773B001E2C31 /* ChartDetailsViewController.swift in Sources */,
 				DDE19CAE223634D2001E2C31 /* ViewController.swift in Sources */,
+				DDE19CCE22377373001E2C31 /* RangeSlider.swift in Sources */,
 				DDE19CAC223634D2001E2C31 /* AppDelegate.swift in Sources */,
 				DDE19CCA22367C8E001E2C31 /* LineView.swift in Sources */,
 				DDE19CBF22363512001E2C31 /* DGChartOverview.swift in Sources */,
+				DDE19CCC22377176001E2C31 /* ChartView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

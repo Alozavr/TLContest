@@ -25,8 +25,6 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
         
         let overview = DGChartOverview(frame: .zero)
         overview.translatesAutoresizingMaskIntoConstraints = false
-        overview.layer.borderColor = UIColor.green.cgColor
-        overview.layer.borderWidth = 1.0
         view.addSubview(overview)
         
         NSLayoutConstraint.activate([

@@ -30,14 +30,14 @@ extension ViewControllerWithTable where Self: UITableViewDelegate, Self: UITable
 }
 
 extension UIView {
-    func bindToSuperView() {
+    func bindToSuperView(with insets: UIEdgeInsets = .zero) {
         guard let superView = self.superview else { return }
         
         NSLayoutConstraint.activate([
-            self.topAnchor.constraint(equalTo: superView.topAnchor),
-            self.bottomAnchor.constraint(equalTo: superView.bottomAnchor),
-            self.trailingAnchor.constraint(equalTo: superView.trailingAnchor),
-            self.leadingAnchor.constraint(equalTo: superView.leadingAnchor)
+            self.topAnchor.constraint(equalTo: superView.topAnchor, constant: insets.top),
+            self.bottomAnchor.constraint(equalTo: superView.bottomAnchor, constant: -insets.bottom),
+            self.trailingAnchor.constraint(equalTo: superView.trailingAnchor, constant: insets.right),
+            self.leadingAnchor.constraint(equalTo: superView.leadingAnchor, constant: insets.left)
             ])
     }
 }
