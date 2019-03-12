@@ -64,13 +64,23 @@ class RangeSliderTrackLayer: CALayer {
 
 class RangeSliderThumbLayer: CALayer {
     
+    enum Direction {
+        case left, right
+    }
+    
+    var direction: Direction = .left {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
+    
     var highlighted: Bool = false {
         didSet {
             setNeedsDisplay()
         }
     }
     
-    var strokeColor: UIColor = UIColor.gray {
+    var strokeColor = UIColor(hexString: "CDCFDF").withAlphaComponent(0.9) {
         didSet {
             setNeedsDisplay()
         }
@@ -81,8 +91,27 @@ class RangeSliderThumbLayer: CALayer {
         }
     }
     
+    init(direction: Direction) {
+        super.init()
+        self.direction = direction
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func draw(in ctx: CGContext) {
-        let thumbPath = UIBezierPath(rect: bounds)
+        
+        let corners: UIRectCorner
+        
+        switch direction {
+        case .left:
+            corners = [.bottomLeft, .topLeft]
+        case .right:
+            corners = [.topRight, .bottomRight]
+        }
+        
+        let thumbPath = UIBezierPath(roundedRect: bounds, byRoundingCorners: corners, cornerRadii: CGSize(width: 4.0, height: 4.0))
         
         // Fill
         ctx.setFillColor(UIColor(hexString: "CDCFDF").withAlphaComponent(0.8).cgColor)
@@ -105,8 +134,8 @@ class RangeSliderThumbLayer: CALayer {
 
 public class RangeSlider: UIControl {
     let trackLayer = RangeSliderTrackLayer()
-    let lowerThumbLayer = RangeSliderThumbLayer()
-    let upperThumbLayer = RangeSliderThumbLayer()
+    let lowerThumbLayer = RangeSliderThumbLayer(direction: .left)
+    let upperThumbLayer = RangeSliderThumbLayer(direction: .right)
     
     public var minimumValue: Double = 0.0
     public var maximumValue: Double = 1.0
@@ -181,7 +210,7 @@ public class RangeSlider: UIControl {
     
     func positionForValue(_ value: Double) -> Double {
         return Double(bounds.width - thumbWidth) * (value - minimumValue) /
-            (maximumValue - minimumValue) + Double(thumbWidth/2.0)
+            (maximumValue - minimumValue) + Double(thumbWidth / 2.0)
     }
     
     func boundValue(_ value: Double, toLowerValue lowerValue: Double, upperValue: Double) -> Double {
@@ -194,15 +223,19 @@ public class RangeSlider: UIControl {
     override public func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
         previousLocation = touch.location(in: self)
         
+        let frameInsideThums = CGRect(x: lowerThumbLayer.frame.origin.x + lowerThumbLayer.frame.width,
+                                      y: center.y,
+                                      width: upperThumbLayer.frame.origin.x - lowerThumbLayer.frame.origin.x + lowerThumbLayer.frame.width,
+                                      height: upperThumbLayer.frame.height)
+        
         // Hit test the thumb layers
         if lowerThumbLayer.frame.contains(previousLocation) {
             lowerThumbLayer.highlighted = true
         } else if upperThumbLayer.frame.contains(previousLocation) {
             upperThumbLayer.highlighted = true
-        } else if trackLayer.frame.contains(previousLocation) {
+        } else if frameInsideThums.contains(previousLocation) {
             lowerThumbLayer.highlighted = true
             upperThumbLayer.highlighted = true
-            return true
         }
         
         return lowerThumbLayer.highlighted || upperThumbLayer.highlighted
@@ -223,8 +256,15 @@ public class RangeSlider: UIControl {
         
         // Update the values
         if lowerThumbLayer.highlighted, upperThumbLayer.highlighted {
-            lowerValue = boundValue(lowerValue + deltaValue, toLowerValue: minimumValue, upperValue: upperValue - gapBetweenThumbs)
-            upperValue = boundValue(upperValue + deltaValue, toLowerValue: lowerValue + gapBetweenThumbs, upperValue: maximumValue)
+            let gap = (upperValue - lowerValue) * (maximumValue - minimumValue)
+            if deltaValue > 0 {
+                let oldLowerValue = lowerValue
+                upperValue = boundValue(gap + oldLowerValue + deltaValue, toLowerValue: oldLowerValue + gap, upperValue: maximumValue)
+                lowerValue = boundValue(lowerValue + deltaValue, toLowerValue: minimumValue, upperValue: upperValue - gap)
+            } else {
+                lowerValue = boundValue(upperValue - gap + deltaValue, toLowerValue: minimumValue, upperValue: upperValue - gap)
+                upperValue = boundValue(gap + lowerValue + deltaValue, toLowerValue: lowerValue + gap, upperValue: maximumValue)
+            }
         } else if lowerThumbLayer.highlighted {
             lowerValue = boundValue(lowerValue + deltaValue, toLowerValue: minimumValue, upperValue: upperValue - gapBetweenThumbs)
         } else if upperThumbLayer.highlighted {
