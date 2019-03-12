@@ -118,7 +118,6 @@
 			children = (
 				DDE19CCF2237B170001E2C31 /* OldFiles */,
 				DDE19CC922367C8E001E2C31 /* LineView.swift */,
-				6C52300C22368AE900CEC3D4 /* GraphView.swift */,
 				6C5230172236B2BB00CEC3D4 /* RangeSlider.swift */,
 				6C52301A22379E9700CEC3D4 /* ChartOverview.swift */,
 				DDE19CCB22377176001E2C31 /* ChartView.swift */,
@@ -142,6 +141,7 @@
 			children = (
 				DDE19CBE22363512001E2C31 /* DGChartOverview.swift */,
 				DDE19CCD22377373001E2C31 /* DGRangeSlider.swift */,
+				6C52300C22368AE900CEC3D4 /* GraphView.swift */,
 			);
 			path = OldFiles;
 			sourceTree = "<group>";

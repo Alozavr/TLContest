@@ -10,7 +10,7 @@ import UIKit
 
 class ChartOverview: UIView {
 
-    var overview: DGChartOverview!
+    var overview: ChartView!
     var slider: RangeSlider!
     
     required init(coder: NSCoder) {
@@ -19,14 +19,8 @@ class ChartOverview: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-    }
-    
-    init(frame: CGRect, chart: Chart) {
-        super.init(frame: frame)
-        backgroundColor = .clear
-        
         let rangeSlider = RangeSlider(frame: .zero)
-        let overview = DGChartOverview(frame: rangeSlider.bounds)
+        let overview = ChartView()
         overview.backgroundColor = .white
         
         addSubview(overview)
@@ -40,10 +34,18 @@ class ChartOverview: UIView {
         overview.bindToSuperView()
         rangeSlider.bindToSuperView()
         
-        overview.displayChart(chart)
-        
         self.overview = overview
         self.slider = rangeSlider
+    }
+    
+    init(frame: CGRect, chart: Chart) {
+        super.init(frame: frame)
+        backgroundColor = .clear
+        self.overview.displayChart(chart)
+    }
+    
+    func displayChart(_ chart: Chart) {
+        overview.displayChart(chart)
     }
     
     @objc func sad() {

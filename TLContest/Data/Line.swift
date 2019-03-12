@@ -12,4 +12,5 @@ struct Line {
     let name: String
     var values: [Int]
     let color: UIColor
+    let isVisible: Bool
 }
