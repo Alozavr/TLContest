@@ -13,7 +13,7 @@ class GraphView: UIView {
     
     private var graph: Chart = Chart(dateAxis: [], lines: [])
     
-    private var xAxis: [Date] = []
+    var xAxis: [Date] = []
     private var yAxises: [Line] = []
     
     private var yAxis: Line = Line(id: UUID().uuidString, name: "", values: [], color: .clear, isVisible: true)
@@ -38,8 +38,16 @@ class GraphView: UIView {
     var labelTextColor: UIColor = UIColor(hexString: "CDCFDF")
     var xAxisColor: UIColor = .black
     var yAxisColor: UIColor = .black
+    
     var yIntervals: CGFloat = 6
-    let xIntervals: CGFloat = 6
+    var xIntervals: CGFloat = 6 {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
+    
+    var lowerBoundIndex: Int = 0
+    var upperBoundIndex: Int = 0
     
     required init(coder: NSCoder) {
         fatalError("NSCoding not supported")
@@ -63,6 +71,11 @@ class GraphView: UIView {
         self.yAxises = yAxises
     }
     
+    func setChart(_ chart: Chart) {
+        self.xAxis = chart.dateAxis
+        self.yAxises = chart.lines
+    }
+    
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         
@@ -70,18 +83,25 @@ class GraphView: UIView {
         
         // Graph size
         graphWidth = rect.size.width
-        graphHeight = rect.size.height
+        graphHeight = rect.size.height + 16
         axisWidth = rect.size.width
-        axisHeight = rect.size.height - padding
+        axisHeight = rect.size.height
         
         guard let context = UIGraphicsGetCurrentContext() else {
             fatalError()
         }
         
-        // Lets work out the highest value and round to the nearest `roundToValue`.
-        // This will be used to work out the position of each value
-        // on the Y axis, it essentialy reperesents 100% of Y
-        let maxValue = CGFloat(yAxises.flatMap({ $0.values }).max() ?? 0)
+        // clean up
+        subviews.forEach({ $0.removeFromSuperview() })
+        everest = 0
+        
+        if lowerBoundIndex == 0, upperBoundIndex == 0 {
+            upperBoundIndex = yAxises.first?.values.count ?? 0
+            lowerBoundIndex = max(upperBoundIndex - Int(xIntervals), 0)
+        }
+        
+        //
+        let maxValue = CGFloat(yAxises.flatMap({ getFilteredYAxisValues($0) }).max() ?? 0)
         if maxValue > everest {
             everest = CGFloat(Int(ceilf(Float(maxValue) / Float(roundToValue)) * Float(roundToValue)))
         }
@@ -108,6 +128,7 @@ class GraphView: UIView {
                     let inset: CGFloat = 8.0
                     
                     let label = axisLabel(title: String(format: "%d", i * yLabelInterval), alignment: .left)
+                    label.backgroundColor = .clear
                     label.frame = CGRect(x: inset,
                                          y: y - labelHeight,
                                          width: 40,
@@ -131,7 +152,7 @@ class GraphView: UIView {
         
         // Draw X labels is needed
         if showXLabels {
-            for (index, x) in xAxis.enumerated() {
+            for (index, x) in xAxis.enumerated().filter({  $0.offset >= lowerBoundIndex && $0.offset <= upperBoundIndex  }) {
                 let interval: CGFloat
                 
                 if showFull {
@@ -156,11 +177,19 @@ class GraphView: UIView {
             self.graphColor = yAxis.color
             
             let pointPath = CGMutablePath()
-            let initialY: CGFloat = ceil((CGFloat(yAxis.values[0]) * (axisHeight / everest)))
+            
+            let initialY: CGFloat
+            
+            if yAxis.values.count > lowerBoundIndex {
+                initialY = ceil((CGFloat(yAxis.values[lowerBoundIndex]) * (axisHeight / everest)))
+            } else {
+                initialY = ceil((CGFloat(yAxis.values[0]) * (axisHeight / everest)))
+            }
+            
             let initialX: CGFloat = 0
             pointPath.move(to: CGPoint(x: initialX, y: graphHeight - initialY))
             
-            for value in zip(xAxis, yAxis.values).dropFirst() {
+            for value in zip(xAxis.enumerated().filter({ $0.offset >= lowerBoundIndex && $0.offset <= upperBoundIndex }).map({ $0.element }), getFilteredYAxisValues(yAxis) ).dropFirst() {
                 plotPoint(point: (value.0, value.1), path: pointPath)
             }
             
@@ -186,6 +215,7 @@ class GraphView: UIView {
         if let index = xAxis.index(ofElement: point.0) {
             pointIndex = index
         }
+        pointIndex -= lowerBoundIndex
         
         let xPosition = CGFloat(pointIndex) * interval
         
@@ -200,6 +230,12 @@ class GraphView: UIView {
         label.backgroundColor = backgroundColor
         label.textAlignment = alignment
         return label
+    }
+    
+    func getFilteredYAxisValues(_ yAxis: Line) -> [Int] {
+        return yAxis.values.enumerated()
+            .filter({  $0.offset >= lowerBoundIndex && $0.offset <= upperBoundIndex  })
+            .map({ $0.element })
     }
     
 }
