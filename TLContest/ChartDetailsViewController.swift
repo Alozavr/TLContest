@@ -62,6 +62,17 @@ extension ChartDetailsViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
         guard indexPath.section == 0, indexPath.row > 0 else { return }
+        let cell = tableView.cellForRow(at: indexPath) as? LineInfoCell
+        let line = chart.lines[indexPath.row - 1]
+        cell?.setIsChecked(!line.isVisible)
+        let newLine = Line.init(id: line.id, name: line.name, values: line.values, color: line.color, isVisible: !line.isVisible)
+        var newLines = chart.lines
+        newLines[indexPath.row - 1] = newLine
+        chart = Chart(dateAxis: chart.dateAxis, lines: newLines)
+        
+        guard let overviewCell = tableView.visibleCells.first(where: { $0 is ChartOverviewCell }) as? ChartOverviewCell else { return }
+//        overviewCell.chartView.overview.setLineVisible(newLine: newLine)
+        overviewCell.chartView.overview.refresh(chart: chart)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

@@ -9,8 +9,9 @@
 import UIKit
 
 struct Line {
+    let id: String
     let name: String
-    var values: [Int]
+    let values: [Int]
     let color: UIColor
     let isVisible: Bool
 }
