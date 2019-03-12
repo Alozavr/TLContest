@@ -224,7 +224,7 @@ public class RangeSlider: UIControl {
         previousLocation = touch.location(in: self)
         
         let frameInsideThums = CGRect(x: lowerThumbLayer.frame.origin.x + lowerThumbLayer.frame.width,
-                                      y: center.y,
+                                      y: 0,
                                       width: upperThumbLayer.frame.origin.x - lowerThumbLayer.frame.origin.x + lowerThumbLayer.frame.width,
                                       height: upperThumbLayer.frame.height)
         
