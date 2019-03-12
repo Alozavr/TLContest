@@ -32,6 +32,8 @@ class ChartOverview: UIView {
         addSubview(overview)
         addSubview(rangeSlider)
         
+        rangeSlider.addTarget(self, action: #selector(sad), for: .valueChanged)
+        
         overview.translatesAutoresizingMaskIntoConstraints = false
         rangeSlider.translatesAutoresizingMaskIntoConstraints = false
         
@@ -42,6 +44,10 @@ class ChartOverview: UIView {
         
         self.overview = overview
         self.slider = rangeSlider
+    }
+    
+    @objc func sad() {
+        print(slider.upperValue - slider.lowerValue)
     }
     
 }
