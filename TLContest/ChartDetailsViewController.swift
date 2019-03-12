@@ -23,6 +23,8 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
         createTableView()
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .white
+        navigationController?.interactivePopGestureRecognizer?.delegate = self
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         title = "Statistics"
 
     }
@@ -77,7 +79,7 @@ extension ChartDetailsViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.section == 0, indexPath.row == 0 {
-            return 200 + 64
+            return 200 + 64 + 32
         } else if indexPath.section == 0 {
             return 44
         }
@@ -87,5 +89,14 @@ extension ChartDetailsViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if section == 0 { return "FOLLOWERS" }
         return nil
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension ChartDetailsViewController: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                                  shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return false
     }
 }

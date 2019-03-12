@@ -83,9 +83,9 @@ class GraphView: UIView {
         
         // Graph size
         graphWidth = rect.size.width
-        graphHeight = rect.size.height + 16
-        axisWidth = rect.size.width
-        axisHeight = rect.size.height
+        graphHeight = rect.size.height
+        axisWidth = rect.size.width - 16
+        axisHeight = rect.size.height - 16
         
         guard let context = UIGraphicsGetCurrentContext() else {
             fatalError()
@@ -128,7 +128,6 @@ class GraphView: UIView {
                 if showYLabels {
                     let labelHeight: CGFloat = 20.0
                     let inset: CGFloat = 8.0
-                    
                     let labelFrame = CGRect(x: inset,
                                          y: y - labelHeight,
                                          width: 40,
@@ -155,19 +154,30 @@ class GraphView: UIView {
         
         // Draw X labels is needed
         if showXLabels {
-            for (index, x) in xAxis.enumerated().filter({  $0.offset >= lowerBoundIndex && $0.offset <= upperBoundIndex  }) {
+            var xElements = xAxis.enumerated().filter({  $0.offset >= lowerBoundIndex && $0.offset <= upperBoundIndex  }).map({ $0.element })
+            
+            let elements: CGFloat = 6.0
+            if !showFull {
+                let chunk = CGFloat(xElements.count) / elements
+                // should take first for first and last for last chunk
+                xElements = xElements.chunked(into: Int(chunk)).compactMap({ $0.first })
+            }
+            
+            for (index, x) in xElements.enumerated() {
                 let interval: CGFloat
                 
                 if showFull {
                     interval = graphWidth / CGFloat(xAxis.count)
                 } else {
-                    let elements: CGFloat = 6.0
                     interval = graphWidth / elements
                 }
                 
                 let xPosition = CGFloat(index) * interval
                 let title = dateFormatters.format(date: x)
-                let labelFrame = CGRect(x: xPosition - interval / 2.0, y: graphHeight + 20, width: interval, height: 20)
+                let labelFrame = CGRect(x: xPosition - interval / 2.0,
+                                        y: graphHeight,
+                                        width: interval,
+                                        height: 20)
                 let xLabel = axisLabel(title: title, frame: labelFrame, alignment: .center)
                 layer.addSublayer(xLabel)
             }
@@ -188,7 +198,7 @@ class GraphView: UIView {
                 initialY = ceil((CGFloat(yAxis.values[0]) * (axisHeight / everest)))
             }
             
-            let initialX: CGFloat = 0
+            let initialX: CGFloat = padding
             pointPath.move(to: CGPoint(x: initialX, y: graphHeight - initialY))
             
             for value in zip(xAxis.enumerated().filter({ $0.offset >= lowerBoundIndex && $0.offset <= upperBoundIndex }).map({ $0.element }), getFilteredYAxisValues(yAxis) ).dropFirst() {

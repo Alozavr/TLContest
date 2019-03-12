@@ -43,16 +43,15 @@ class ChartOverviewCell: UITableViewCell {
         chartView.slider.addTarget(self, action: #selector(sliderDidChangeValue), for: .valueChanged)
         
         graph.topAnchor.constraint(equalTo: topAnchor).isActive = true
-        graph.bottomAnchor.constraint(equalTo: chartView.bottomAnchor, constant: 0).isActive = true
-        graph.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-        graph.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+        graph.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16).isActive = true
+        graph.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16).isActive = true
         graph.heightAnchor.constraint(equalToConstant: 200).isActive = true
         
+        graph.topAnchor.constraint(equalTo: topAnchor, constant: 200 + 32).isActive = true
         chartView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-        chartView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-        chartView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+        chartView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16).isActive = true
+        chartView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16).isActive = true
         chartView.heightAnchor.constraint(equalToConstant: 64).isActive = true
-//        chartView.bindToSuperView()
         
         self.graph = graph
         self.chartView = chartView
