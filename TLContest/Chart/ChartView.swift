@@ -15,10 +15,15 @@ class ChartView: UIView {
     func refresh(chart: Chart) {
         let viewsToRemove = subviews.compactMap { (subView) -> LineView? in
             guard let lineView = subView as? LineView else { return nil }
-            guard let line = chart.lines.first(where: { $0.id == lineView.line.id }), line.isVisible == false else {
+            guard let line = chart.lines.first(where: { $0.id == lineView.line.id }) else {
                 return nil
             }
-            return lineView
+            lineView.line = line
+            return !line.isVisible ? lineView : nil
+        }
+        
+        for view in viewsToRemove {
+            view.animateDisappearence()
         }
         
         let lines = chart.lines.filter { $0.isVisible }
@@ -29,21 +34,12 @@ class ChartView: UIView {
             let lineCoefficients = line.values.map({ CGFloat($0) }).map({ CGFloat( ($0 - min) / (max - min) ) })
             guard lineCoefficients.count == xAxisCoefficients.count else { continue }
             let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
-            guard let view = subviews.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
+            guard let view = subviews.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id && $0.line.isVisible == true }) else {
                 createLineView(line: line, coefficients: coefficients)
                 continue
             }
+            print(view)
             view.coefficients = coefficients
-        }
-        
-        UIView.animate(withDuration: 0.3, animations: {
-            for view in viewsToRemove {
-                view.alpha = 0
-            }
-        }) { (_) in
-            for view in viewsToRemove {
-                view.removeFromSuperview()
-            }
         }
         
     }
@@ -53,6 +49,7 @@ class ChartView: UIView {
         lineView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(lineView)
         lineView.bindToSuperView(with: UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 0))
+        lineView.animateAppearence()
     }
 
     
