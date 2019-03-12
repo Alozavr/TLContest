@@ -11,10 +11,13 @@ import UIKit
 class LineView: UIView {
 
     let line: Line
+    let coefficients: [(x: CGFloat, y: CGFloat)]
     
-    init(frame: CGRect, line: Line) {
+    init(frame: CGRect, line: Line, coefficients: [(x: CGFloat, y: CGFloat)]) {
+        self.coefficients = coefficients
         self.line = line
         super.init(frame: frame)
+        backgroundColor = .clear
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -24,12 +27,15 @@ class LineView: UIView {
     override func draw(_ rect: CGRect) {
         guard let context = UIGraphicsGetCurrentContext() else { return }
         let lineWidth: CGFloat = 1.0
+        let points = coefficients.map({ CGPoint(x: $0 * rect.width, y: rect.height - $1 * rect.height) })
+        
         context.setLineWidth(lineWidth)
         context.setStrokeColor(line.color.cgColor)
         let startingPoint = CGPoint(x: 0, y: rect.size.height - lineWidth)
-        let endingPoint = CGPoint(x: rect.size.width, y: rect.size.height - lineWidth)
         context.move(to: startingPoint )
-        context.addLine(to: endingPoint )
+        for (i, _) in line.values.enumerated() {
+            context.addLine(to: points[i] )
+        }
         context.strokePath()
     }
  

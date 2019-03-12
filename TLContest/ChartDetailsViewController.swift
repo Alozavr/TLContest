@@ -23,41 +23,58 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
         createTableView()
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .white
-        
-        let overview = ChartOverview(frame: .zero, chart: chart)
-        overview.translatesAutoresizingMaskIntoConstraints = false
-        overview.backgroundColor = UIColor.white
-        
-        view.addSubview(overview)
-        
-        overview.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
-        overview.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
-        overview.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        overview.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        overview.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        title = "Statistics"
+
     }
     
     func registerCells() {
-        
+        tableView.register(ChartOverviewCell.self, forCellReuseIdentifier: "ChartOverviewCell")
+        tableView.register(LineInfoCell.self, forCellReuseIdentifier: "LineInfoCell")
     }
-    
-    
 }
 
 extension ChartDetailsViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 0
+        return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.section == 0, indexPath.row == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ChartOverviewCell") as! ChartOverviewCell
+            cell.chartView.displayChart(chart)
+            return cell
+        } else if indexPath.section == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "LineInfoCell") as! LineInfoCell
+            let line = chart.lines[indexPath.row - 1]
+            cell.configure(color: line.color, text: line.name, isChecked: line.isVisible)
+            return cell
+        }
         return UITableViewCell()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
+        return chart.lines.count + 1
     }
 }
 
 extension ChartDetailsViewController: UITableViewDelegate {
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: false)
+        guard indexPath.section == 0, indexPath.row > 0 else { return }
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if indexPath.section == 0, indexPath.row == 0 {
+            return 64
+        } else if indexPath.section == 0 {
+            return 44
+        }
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == 0 { return "FOLLOWERS" }
+        return nil
+    }
 }
