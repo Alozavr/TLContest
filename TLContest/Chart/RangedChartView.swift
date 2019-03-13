@@ -126,8 +126,12 @@ class RangedChartView: UIControl {
         let infoWidth: CGFloat = max(60 + CGFloat(numberOfDigits) * 12.0, 80.0)
         let infoSize = CGSize(width: infoWidth, height: infoHeight)
         let date = dateAxis[coeffIndex]
+        
+        let minPointX: CGFloat = -8.0
+        let maxPointX = bounds.width - infoWidth + 8.0
+        
         drawInfo(onLayer: layer,
-                 atPoint: CGPoint(x: x - 50, y: 16),
+                 atPoint: CGPoint(x: max(min(x - infoWidth / 2.0, maxPointX), minPointX), y: 16),
                  withSize: infoSize,
                  date: date,
                  lines: visibleLines,
