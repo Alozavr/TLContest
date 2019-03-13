@@ -47,7 +47,7 @@ class ChartOverviewCell: UITableViewCell {
         graph.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16).isActive = true
         graph.heightAnchor.constraint(equalToConstant: 200).isActive = true
         
-        graph.topAnchor.constraint(equalTo: topAnchor, constant: 200 + 32).isActive = true
+        chartView.topAnchor.constraint(equalTo: topAnchor, constant: 200 + 32).isActive = true
         chartView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         chartView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16).isActive = true
         chartView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16).isActive = true
