@@ -16,11 +16,11 @@ extension UIView {
         }
     }
     
-    func animateDisappearence(with duration: TimeInterval = 0.3) {
+    func animateDisappearence(with duration: TimeInterval = 0.3, removeOnComplete: Bool) {
         UIView.animate(withDuration: 0.3, animations: { [weak self] in
             self?.alpha = 0
             }) { [weak self] _ in
-                self?.removeFromSuperview()
+                if removeOnComplete { self?.removeFromSuperview() }
         }
     }
 }

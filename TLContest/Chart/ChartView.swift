@@ -23,7 +23,7 @@ class ChartView: UIView {
         }
         
         for view in viewsToRemove {
-            view.animateDisappearence()
+            view.animateDisappearence(removeOnComplete: false)
         }
         
         let lines = chart.lines.filter { $0.isVisible }
@@ -34,11 +34,11 @@ class ChartView: UIView {
             let lineCoefficients = line.values.map({ CGFloat($0) }).map({ CGFloat( ($0 - min) / (max - min) ) })
             guard lineCoefficients.count == xAxisCoefficients.count else { continue }
             let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
-            guard let view = subviews.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id && $0.line.isVisible == true }) else {
+            guard let view = subviews.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
                 createLineView(line: line, coefficients: coefficients)
                 continue
             }
-            print(view)
+            if view.alpha == 0 { view.animateAppearence() }
             view.coefficients = coefficients
         }
         

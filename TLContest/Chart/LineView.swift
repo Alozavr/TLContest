@@ -34,7 +34,6 @@ class LineView: UIView {
     
     override func draw(_ rect: CGRect) {
 //        guard let context = UIGraphicsGetCurrentContext() else { return }
-        shapeLayer.frame = rect
         let path = UIBezierPath()
         let lineWidth: CGFloat = 1.0
         let points = coefficients.map({ CGPoint(x: $0 * rect.width, y: rect.height - $1 * rect.height) })
@@ -47,20 +46,19 @@ class LineView: UIView {
         for (i, _) in line.values.enumerated() {
             path.addLine(to: points[i] )
         }
-        guard let previousPath = oldPath else {
+        guard let previousPath = oldPath, oldPath != path else {
             oldPath = path
             shapeLayer.path = path.cgPath
             return
         }
         CATransaction.begin()
-        CATransaction.setCompletionBlock({ [weak self] in
-            self?.oldPath = path
-            self?.shapeLayer.path = path.cgPath
-        })
+        oldPath = path
+        shapeLayer.path = path.cgPath
         let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.path))
         pathAnimation.fromValue = previousPath.cgPath
         pathAnimation.toValue = path.cgPath
         pathAnimation.duration = 0.3
+        pathAnimation.fillMode = .both
         shapeLayer.add(pathAnimation, forKey:"animationKey")
         CATransaction.commit()
         
