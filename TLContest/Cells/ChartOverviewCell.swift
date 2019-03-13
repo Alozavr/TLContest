@@ -57,18 +57,13 @@ class ChartOverviewCell: UITableViewCell {
         
         self.graph = graph
         self.chartView = chartView
-        
-//        let lowerBoundIndex = Int(Double(graph.xAxis.count) * (chartView.slider.lowerValue))
-//        let upperBoundIndex = Int(Double(graph.xAxis.count) * (chartView.slider.upperValue))
-//        graph.lowerBoundIndex = lowerBoundIndex
-//        graph.upperBoundIndex = upperBoundIndex
-//        graph.xIntervals = CGFloat(Double(graph.xAxis.count) * (chartView.slider.upperValue - chartView.slider.lowerValue)).rounded(.up)
     }
     
     func setChart(_ chart: Chart) {
         self.chart = chart
         graph.displayChart(chart)
         chartView.displayChart(chart)
+        sliderDidChangeValue()
     }
     
     @objc func sliderDidChangeValue() {
