@@ -20,6 +20,7 @@ class RangedChartView: UIControl {
         if chart.dateAxis != dateAxis {
             xAxisCoefficients.removeAll()
         }
+        
         self.dateAxis = chart.dateAxis
         calculateXAxisCoefficients(chart)
         
@@ -55,7 +56,6 @@ class RangedChartView: UIControl {
             if view.opacity == 0 { view.animateAppearence() }
             view.coefficients = coefficients
         }
-        
     }
     
     override func layoutSubviews() {
@@ -110,7 +110,7 @@ class RangedChartView: UIControl {
         let x = coeff *  bounds.width
         
         if previousX != x {
-            removeTempLayers()
+            removeTempInfoLayers()
             impact.impactOccurred()
         }
         
@@ -123,7 +123,7 @@ class RangedChartView: UIControl {
         let maxValue = visibleLines.compactMap({ $0.values[coeffIndex] }).max() ?? 0
         let numberOfDigits = "\(maxValue)".count
         let infoHeight: CGFloat = max(20.0 * CGFloat(visibleLines.count), 40.0)
-        let infoWidth: CGFloat = max(50 + CGFloat(numberOfDigits) * 12.0, 80.0)
+        let infoWidth: CGFloat = max(60 + CGFloat(numberOfDigits) * 12.0, 80.0)
         let infoSize = CGSize(width: infoWidth, height: infoHeight)
         let date = dateAxis[coeffIndex]
         drawInfo(onLayer: layer,
@@ -162,12 +162,21 @@ class RangedChartView: UIControl {
     }
     
     override public func endTracking(_ touch: UITouch?, with event: UIEvent?) {
-        removeTempLayers()
+        removeTempInfoLayers()
     }
     
-    func removeTempLayers() {
+    func removeTempInfoLayers() {
         for sublayer in (layer.sublayers ?? []) {
             if tempLayers.contains(sublayer) {
+                sublayer.removeFromSuperlayer()
+            }
+        }
+        tempLayers.removeAll()
+    }
+    
+    func removeTempLayers(inArray array: [CALayer]) {
+        for sublayer in (layer.sublayers ?? []) {
+            if array.contains(sublayer) {
                 sublayer.removeFromSuperlayer()
             }
         }
@@ -212,7 +221,7 @@ class RangedChartView: UIControl {
                                  bottom: insetFromBottom,
                                  right: insetFromRight)
         
-        let dateRect = CGRect(x: inset.left, y: inset.top, width: rect.width / 2.0, height: min(rect.height / 2.0, 20))
+        let dateRect = CGRect(x: inset.left, y: inset.top, width: rect.width / 2.0 + commonInset, height: min(rect.height / 2.0, 20))
         let dateText = dateFormatters.format(date: date)
         let datelLayer = getLabelLayer(title: dateText,
                                            frame: dateRect,
