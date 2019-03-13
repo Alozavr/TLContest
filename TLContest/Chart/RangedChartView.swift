@@ -109,8 +109,6 @@ class RangedChartView: UIControl {
             
         let x = coeff *  bounds.width
         
-        print(tempLayers.count)
-        
         if previousX != x {
             removeTempLayers()
             impact.impactOccurred()
@@ -119,8 +117,21 @@ class RangedChartView: UIControl {
         previousX = x
         
         let startingPoint = CGPoint(x: x, y: bounds.size.height)
-        let endPoint = CGPoint(x: x, y: 0)
+        let endPoint = CGPoint(x: x, y: 16)
         drawLine(onLayer: layer, fromPoint: startingPoint, toPoint: endPoint)
+        
+        let maxValue = visibleLines.compactMap({ $0.values[coeffIndex] }).max() ?? 0
+        let numberOfDigits = "\(maxValue)".count
+        let infoHeight: CGFloat = max(20.0 * CGFloat(visibleLines.count), 40.0)
+        let infoWidth: CGFloat = max(50 + CGFloat(numberOfDigits) * 12.0, 80.0)
+        let infoSize = CGSize(width: infoWidth, height: infoHeight)
+        let date = dateAxis[coeffIndex]
+        drawInfo(onLayer: layer,
+                 atPoint: CGPoint(x: x - 50, y: 16),
+                 withSize: infoSize,
+                 date: date,
+                 lines: visibleLines,
+                 currentValueIndex: coeffIndex)
         
         for (index, line) in visibleLines.enumerated() {
             guard line.values.count > coeffIndex,
@@ -174,6 +185,86 @@ class RangedChartView: UIControl {
         line.strokeColor = UIColor.lightGray.cgColor
         layer.addSublayer(line)
         tempLayers.append(line)
+    }
+    
+    private var dateFormatters = DateFormatters()
+    
+    func drawInfo(onLayer layer: CALayer,
+                  atPoint point: CGPoint,
+                  withSize size: CGSize,
+                  date: Date,
+                  lines: [Line],
+                  currentValueIndex: Int) {
+        let infoLayer = CAShapeLayer()
+        let rect = CGRect(origin: point, size: size)
+        let info = UIBezierPath(roundedRect: rect, cornerRadius: 8.0)
+        infoLayer.path = info.cgPath
+        infoLayer.fillColor = UIColor(hexString: "FAFAFA").cgColor
+        infoLayer.opacity = 1.0
+        
+        let commonInset: CGFloat = 4.0
+        let insetFromLeft: CGFloat = rect.origin.x + commonInset
+        let insetFromRight: CGFloat = rect.origin.x + rect.width - commonInset
+        let insetFromTop: CGFloat = rect.origin.y + commonInset
+        let insetFromBottom: CGFloat = rect.origin.y + rect.height - commonInset
+        let inset = UIEdgeInsets(top: insetFromTop,
+                                 left: insetFromLeft,
+                                 bottom: insetFromBottom,
+                                 right: insetFromRight)
+        
+        let dateRect = CGRect(x: inset.left, y: inset.top, width: rect.width / 2.0, height: min(rect.height / 2.0, 20))
+        let dateText = dateFormatters.format(date: date)
+        let datelLayer = getLabelLayer(title: dateText,
+                                           frame: dateRect,
+                                           font: UIFont.boldSystemFont(ofSize: 12.0),
+                                           color: UIColor(hexString: "77777c"),
+                                           alignment: .left)
+        infoLayer.addSublayer(datelLayer)
+        
+        let yearRect = CGRect(x: inset.left, y: inset.top + dateRect.height, width: rect.width / 2.0, height: min(rect.height / 2.0, 20))
+        let yearText = dateFormatters.formatDateToYear(date: date)
+        let yearLayer = getLabelLayer(title: yearText,
+                                           frame: yearRect,
+                                           font: UIFont.systemFont(ofSize: 10.0),
+                                           color: UIColor(hexString: "77777c"),
+                                           alignment: .left)
+        infoLayer.addSublayer(yearLayer)
+        
+        let lineCountHeight = min(rect.height / CGFloat(lines.count), 20)
+        let lineCountWidth = rect.width / 2.0
+        for (index, line) in lines.enumerated() {
+            let lineCountRect = CGRect(x: inset.right - lineCountWidth,
+                                       y: insetFromTop + CGFloat(index) * lineCountHeight,
+                                       width: lineCountWidth,
+                                       height: lineCountHeight)
+            let lineCountText = line.values[currentValueIndex].description
+            let lineCountLayer = getLabelLayer(title: lineCountText,
+                                               frame: lineCountRect,
+                                               font: UIFont.boldSystemFont(ofSize: 12.0),
+                                               color: line.color,
+                                               alignment: .right)
+            infoLayer.addSublayer(lineCountLayer)
+        }
+        
+        layer.addSublayer(infoLayer)
+        tempLayers.append(infoLayer)
+    }
+    
+    func getLabelLayer(title: String,
+                       frame: CGRect,
+                       font: UIFont,
+                       color: UIColor,
+                       alignment: CATextLayerAlignmentMode) -> CATextLayer {
+        let textLayer = CATextLayer()
+        textLayer.frame = frame
+        textLayer.foregroundColor = color.cgColor
+        textLayer.backgroundColor = UIColor.clear.cgColor
+        textLayer.alignmentMode = alignment
+        textLayer.contentsScale = UIScreen.main.scale
+        textLayer.font = CTFontCreateWithName(font.fontName as CFString, 0, nil)
+        textLayer.fontSize = font.pointSize
+        textLayer.string = title
+        return textLayer
     }
     
 }

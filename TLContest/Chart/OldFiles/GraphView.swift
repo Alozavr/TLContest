@@ -239,7 +239,7 @@ class GraphView: UIView {
         textLayer.frame = frame
         textLayer.foregroundColor = UIColor(hexString: "abafb4").cgColor
         textLayer.backgroundColor = UIColor.clear.cgColor
-        textLayer.alignmentMode = .left
+        textLayer.alignmentMode = alignment
         textLayer.contentsScale = UIScreen.main.scale
         textLayer.font = CTFontCreateWithName(labelFont.fontName as CFString, 0, nil)
         textLayer.fontSize = labelFont.pointSize
