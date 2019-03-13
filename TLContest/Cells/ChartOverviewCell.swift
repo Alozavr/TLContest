@@ -29,6 +29,7 @@ class ChartOverviewCell: UITableViewCell {
     }
 
     private func initChart() {
+        setupThemeNotification()
         selectionStyle = .none
         
         let graph = DetailedChartView()

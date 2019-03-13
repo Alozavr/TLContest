@@ -17,7 +17,7 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
         view = UIView()
         view.backgroundColor = .white
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         createTableView()
@@ -26,7 +26,7 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
         navigationController?.interactivePopGestureRecognizer?.delegate = self
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         title = "Statistics"
-
+        tableView.setupThemeNotification()
     }
     
     func registerCells() {
@@ -74,6 +74,8 @@ extension ChartDetailsViewController: UITableViewDelegate {
         
         guard let overviewCell = tableView.visibleCells.first(where: { $0 is ChartOverviewCell }) as? ChartOverviewCell else { return }
         overviewCell.setChart(chart)
+        
+        NotificationCenter.default.post(name: NSNotification.Name.updateTheme, object: nil)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -98,4 +100,26 @@ extension ChartDetailsViewController: UIGestureRecognizerDelegate {
                                   shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return false
     }
+}
+
+extension NSNotification.Name {
+    
+    static var updateTheme = NSNotification.Name("UpdateThemeNotification")
+    
+}
+
+extension UIView {
+    
+    func setupThemeNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(updateTheme), name: NSNotification.Name.updateTheme, object: nil)
+    }
+    
+    fileprivate func removeThemeNotification() {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.updateTheme, object: nil)
+    }
+    
+    @objc private func updateTheme() {
+        backgroundColor = UIColor(hexString: "232f3e")
+    }
+    
 }

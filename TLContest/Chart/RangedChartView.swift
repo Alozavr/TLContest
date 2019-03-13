@@ -16,6 +16,15 @@ class RangedChartView: UIControl {
     var visibleLines: [Line] = []
     var lineCoefficients: [Int: [CGFloat]] = [:]
     
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupThemeNotification()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     func displayChart(chart: Chart) {
         if chart.dateAxis != dateAxis {
             xAxisCoefficients.removeAll()

@@ -34,12 +34,14 @@ class ChartOverview: UIView {
         
         self.overview = overview
         self.slider = rangeSlider
+        self.setupThemeNotification()
     }
     
     init(frame: CGRect, chart: Chart) {
         super.init(frame: frame)
         backgroundColor = .clear
         self.overview.displayChart(chart: chart)
+        self.setupThemeNotification()
     }
     
     func displayChart(_ chart: Chart) {

@@ -24,6 +24,7 @@ class LineInfoCell: UITableViewCell {
     }
     
     private func setupView() {
+        setupThemeNotification()
         initColorView()
         initLabelView()
         selectionStyle = .none

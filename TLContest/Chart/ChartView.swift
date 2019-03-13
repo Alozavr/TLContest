@@ -12,6 +12,15 @@ class ChartView: UIView {
     
     var xAxisCoefficients: [CGFloat] = []
     
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupThemeNotification()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     func displayChart(chart: Chart) {
         calculateXAxisCoefficients(chart)
         
