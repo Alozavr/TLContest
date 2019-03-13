@@ -39,10 +39,12 @@ class RangedChartView: UIControl {
         let lines = chart.lines.filter { $0.isVisible }
         self.visibleLines = lines
         let joinedYValues = lines.reduce([], { $0 + $1.values.map({ CGFloat($0) })})
-        guard let max = joinedYValues.max(), let min = joinedYValues.min() else { return }
+        guard let max = joinedYValues.max()/*, let min = joinedYValues.min()*/ else { return }
+        // MARK: Delete if need to start Y axis not from 0
+        let min: CGFloat = 0
         
         for (index, line) in lines.enumerated() {
-            let lineCoefficients = line.values.map({ CGFloat($0) }).map({ CGFloat( ($0 - min) / (max - min) ) })
+            let lineCoefficients = line.values.map({ CGFloat($0) }).map({ ($0 - min) / (max - min) })
             self.lineCoefficients[index] = lineCoefficients
             guard lineCoefficients.count == xAxisCoefficients.count else { continue }
             let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
