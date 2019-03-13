@@ -10,11 +10,13 @@ import UIKit
 
 class ChartOverviewCell: UITableViewCell {
     
-    weak var graph: GraphView!
+    weak var graph: DetailedChartView!
     weak var chartView: ChartOverview!
     
     var previousLowerRangeValue: Double = 0
     var previousUpperRangeValue: Double = 0
+    
+    var chart: Chart!
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -29,7 +31,7 @@ class ChartOverviewCell: UITableViewCell {
     private func initChart() {
         selectionStyle = .none
         
-        let graph = GraphView()
+        let graph = DetailedChartView()
         graph.backgroundColor = .white
         graph.translatesAutoresizingMaskIntoConstraints = false
         addSubview(graph)
@@ -56,25 +58,48 @@ class ChartOverviewCell: UITableViewCell {
         self.graph = graph
         self.chartView = chartView
         
-        let lowerBoundIndex = Int(Double(graph.xAxis.count) * (chartView.slider.lowerValue))
-        let upperBoundIndex = Int(Double(graph.xAxis.count) * (chartView.slider.upperValue))
-        graph.lowerBoundIndex = lowerBoundIndex
-        graph.upperBoundIndex = upperBoundIndex
-        graph.xIntervals = CGFloat(Double(graph.xAxis.count) * (chartView.slider.upperValue - chartView.slider.lowerValue)).rounded(.up)
+//        let lowerBoundIndex = Int(Double(graph.xAxis.count) * (chartView.slider.lowerValue))
+//        let upperBoundIndex = Int(Double(graph.xAxis.count) * (chartView.slider.upperValue))
+//        graph.lowerBoundIndex = lowerBoundIndex
+//        graph.upperBoundIndex = upperBoundIndex
+//        graph.xIntervals = CGFloat(Double(graph.xAxis.count) * (chartView.slider.upperValue - chartView.slider.lowerValue)).rounded(.up)
     }
     
     func setChart(_ chart: Chart) {
-        graph.setChart(chart)
+        self.chart = chart
+        graph.displayChart(chart)
         chartView.displayChart(chart)
     }
     
     @objc func sliderDidChangeValue() {
-        if fabs(previousLowerRangeValue - chartView.slider.lowerValue) > 0.05 || fabs(previousUpperRangeValue - chartView.slider.upperValue) > 0.05 {
-            let lowerBoundIndex = Int(Double(graph.xAxis.count) * (chartView.slider.lowerValue))
-            let upperBoundIndex = Int(Double(graph.xAxis.count) * (chartView.slider.upperValue))
-            graph.lowerBoundIndex = lowerBoundIndex
-            graph.upperBoundIndex = upperBoundIndex
-            graph.xIntervals = CGFloat(Double(graph.xAxis.count) * (chartView.slider.upperValue - chartView.slider.lowerValue)).rounded(.up)
+        if fabs(previousLowerRangeValue - chartView.slider.lowerValue) > 0.05 ||
+            fabs(previousUpperRangeValue - chartView.slider.upperValue) > 0.05 {
+            let oldDateAxis = self.chart.dateAxis
+            
+            let lowerBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.lowerValue))
+            let upperBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.upperValue))
+            
+            var newDateAxis = oldDateAxis
+            if upperBoundIndex > lowerBoundIndex, oldDateAxis.count >= upperBoundIndex {
+                newDateAxis = Array(oldDateAxis[lowerBoundIndex..<upperBoundIndex])
+            }
+            
+            var lines: [Line] = []
+            for line in chart.lines {
+                var newLine = line
+                if upperBoundIndex > lowerBoundIndex, line.values.count >= upperBoundIndex {
+                    let newValues = Array(newLine.values[lowerBoundIndex..<upperBoundIndex])
+                    newLine = Line(id: line.id,
+                                   name: line.name,
+                                   values: newValues,
+                                   color: line.color,
+                                   isVisible: line.isVisible)
+                }
+                lines.append(newLine)
+            }
+            
+            let newChart = Chart(dateAxis: newDateAxis, lines: lines)
+            graph.chartView.displayChart(chart: newChart)
         }
     }
 }

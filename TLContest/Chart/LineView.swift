@@ -47,17 +47,28 @@ class LineView: CAShapeLayer {
         path.lineWidth = lineWidth
         strokeColor = line.color.cgColor
         
-        let startingPoint = CGPoint(x: 0, y: rect.size.height - lineWidth)
+        let firstPoint = points.first
+        let startingPoint = CGPoint(x: firstPoint?.x ?? 0,
+                                    y: firstPoint?.y ?? (rect.size.height - lineWidth))
         path.move(to: startingPoint )
-        for (i, _) in line.values.enumerated() {
-            path.addLine(to: points[i] )
+        
+        for point in points.dropFirst() {
+            path.addLine(to: point)
         }
+        
         guard let previousPath = oldPath, oldPath != path else {
             oldPath = path
             self.path = path.cgPath
             return
         }
+//        removeAnimation(forKey: "animationKey")
+        
+//        print("lala: scheldued")
         CATransaction.begin()
+//        CATransaction.setCompletionBlock {
+//            print("lala: animation completed")
+//        }
+        
         oldPath = path
         self.path = path.cgPath
         let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.path))
@@ -65,6 +76,7 @@ class LineView: CAShapeLayer {
         pathAnimation.toValue = path.cgPath
         pathAnimation.duration = 0.3
         pathAnimation.fillMode = .both
+//        pathAnimation.beginTime = CACurrentMediaTime() + 0.2
         add(pathAnimation, forKey:"animationKey")
         CATransaction.commit()
     }

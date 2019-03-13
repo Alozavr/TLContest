@@ -73,8 +73,9 @@ extension ChartDetailsViewController: UITableViewDelegate {
         chart = Chart(dateAxis: chart.dateAxis, lines: newLines)
         
         guard let overviewCell = tableView.visibleCells.first(where: { $0 is ChartOverviewCell }) as? ChartOverviewCell else { return }
-//        overviewCell.chartView.overview.setLineVisible(newLine: newLine)
-        overviewCell.chartView.overview.refresh(chart: chart)
+        overviewCell.chart = chart
+        overviewCell.graph.chartView.displayChart(chart: chart)
+        overviewCell.chartView.overview.displayChart(chart: chart)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

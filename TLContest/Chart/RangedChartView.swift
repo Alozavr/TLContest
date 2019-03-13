@@ -1,18 +1,24 @@
 //
-//  ChartView.swift
+//  RangedChartView.swift
 //  TLContest
 //
-//  Created by Dmitry Grebenschikov on 12/03/2019.
+//  Created by Alexander Shoshiashvili on 13/03/2019.
 //  Copyright © 2019 dd-team. All rights reserved.
 //
 
 import UIKit
 
-class ChartView: UIView {
+class RangedChartView: UIView {
     
     var xAxisCoefficients: [CGFloat] = []
     
+    var dateAxis: [Date] = []
+    
     func displayChart(chart: Chart) {
+        if chart.dateAxis != dateAxis {
+            xAxisCoefficients.removeAll()
+        }
+        self.dateAxis = chart.dateAxis
         calculateXAxisCoefficients(chart)
         
         let viewsToRemove = layer.sublayers?.compactMap { (subView) -> LineView? in
@@ -22,7 +28,7 @@ class ChartView: UIView {
             }
             lineView.line = line
             return !line.isVisible ? lineView : nil
-        } ?? []
+            } ?? []
         
         for view in viewsToRemove {
             view.animateDisappearence(removeOnComplete: false)
@@ -60,7 +66,7 @@ class ChartView: UIView {
         layer.addSublayer(lineView)
         lineView.animateAppearence()
     }
-
+    
     
     private func calculateXAxisCoefficients(_ chart: Chart) {
         guard xAxisCoefficients.isEmpty,
@@ -69,5 +75,5 @@ class ChartView: UIView {
         
         xAxisCoefficients = chart.dateAxis.map({ CGFloat( ($0.timeIntervalSince1970 - firstDate) / (lastDate - firstDate)) })
     }
-
+    
 }

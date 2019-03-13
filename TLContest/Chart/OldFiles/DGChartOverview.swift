@@ -36,7 +36,7 @@ class DGChartOverview: UIView {
         chartView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(chartView)
         chartView.bindToSuperView(with: .init(top: 1, left: 0, bottom: 1, right: 0))
-        chartView.displayChart(chart)
+        chartView.displayChart(chart: chart)
         sendSubviewToBack(chartView)
     }
     

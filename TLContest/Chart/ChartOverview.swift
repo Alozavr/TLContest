@@ -39,11 +39,11 @@ class ChartOverview: UIView {
     init(frame: CGRect, chart: Chart) {
         super.init(frame: frame)
         backgroundColor = .clear
-        self.overview.displayChart(chart)
+        self.overview.displayChart(chart: chart)
     }
     
     func displayChart(_ chart: Chart) {
-        overview.displayChart(chart)
+        overview.displayChart(chart: chart)
     }
     
 }
