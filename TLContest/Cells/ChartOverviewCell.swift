@@ -31,9 +31,11 @@ class ChartOverviewCell: UITableViewCell {
     private func initChart() {
         setupThemeNotification()
         selectionStyle = .none
+        contentView.backgroundColor = Colors.shared.primaryColor
+        backgroundColor = Colors.shared.primaryColor
         
         let graph = DetailedChartView()
-        graph.backgroundColor = .white
+        graph.backgroundColor = Colors.shared.primaryColor
         graph.translatesAutoresizingMaskIntoConstraints = false
         addSubview(graph)
         

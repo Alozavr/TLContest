@@ -21,7 +21,7 @@ class ChartOverview: UIView {
         super.init(frame: frame)
         let rangeSlider = RangeSlider(frame: .zero)
         let overview = ChartView()
-        overview.backgroundColor = .white
+        overview.backgroundColor = Colors.shared.primaryColor
         
         addSubview(overview)
         addSubview(rangeSlider)

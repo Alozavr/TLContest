@@ -28,6 +28,8 @@ class LineInfoCell: UITableViewCell {
         initColorView()
         initLabelView()
         selectionStyle = .none
+        contentView.backgroundColor = Colors.shared.primaryColor
+        backgroundColor = Colors.shared.primaryColor
     }
     
     func configure(color: UIColor, text: String, isChecked: Bool) {

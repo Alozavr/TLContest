@@ -28,12 +28,12 @@ class RangeSliderTrackLayer: CALayer {
         ctx.fill(rect)
         
         // color for backround before left thumb
-        ctx.setFillColor(UIColor(hexString: "f6f8fa").withAlphaComponent(0.7).cgColor)
+        ctx.setFillColor(Colors.shared.secondaryBColor.withAlphaComponent(0.7).cgColor)
         let lowerRect = CGRect(x: 0, y: 0.0, width: lowerValuePosition, height: bounds.height)
         ctx.fill(lowerRect)
         
         // color for backround after right thumb
-        ctx.setFillColor(UIColor(hexString: "f6f8fa").withAlphaComponent(0.7).cgColor)
+        ctx.setFillColor(Colors.shared.secondaryBColor.withAlphaComponent(0.7).cgColor)
         let upperRect = CGRect(x: upperValuePosition, y: 0.0, width: bounds.width - upperValuePosition, height: bounds.height)
         ctx.fill(upperRect)
         
@@ -45,7 +45,7 @@ class RangeSliderTrackLayer: CALayer {
                                  y: bounds.height))
         ctx.addPath(lowerLine)
         ctx.setLineWidth(2)
-        ctx.setStrokeColor(UIColor(hexString: "cbd3dd").withAlphaComponent(0.8).cgColor)
+        ctx.setStrokeColor(Colors.shared.secondaryAColor.withAlphaComponent(0.8).cgColor)
         ctx.strokePath()
         
         // up line
@@ -56,7 +56,7 @@ class RangeSliderTrackLayer: CALayer {
                                       y: 0))
         ctx.addPath(upperLine)
         ctx.setLineWidth(2)
-        ctx.setStrokeColor(UIColor(hexString: "cbd3dd").withAlphaComponent(0.8).cgColor)
+        ctx.setStrokeColor(Colors.shared.secondaryAColor.withAlphaComponent(0.8).cgColor)
         ctx.strokePath()
         
     }
@@ -80,7 +80,7 @@ class RangeSliderThumbLayer: CALayer {
         }
     }
     
-    var strokeColor = UIColor(hexString: "cbd3dd").withAlphaComponent(0.8) {
+    var strokeColor = Colors.shared.secondaryAColor.withAlphaComponent(0.8) {
         didSet {
             setNeedsDisplay()
         }
@@ -118,7 +118,7 @@ class RangeSliderThumbLayer: CALayer {
         let thumbPath = UIBezierPath(roundedRect: bounds, byRoundingCorners: corners, cornerRadii: CGSize(width: 4.0, height: 4.0))
         
         // Fill
-        ctx.setFillColor(UIColor(hexString: "cbd3dd").withAlphaComponent(0.8).cgColor)
+        ctx.setFillColor(Colors.shared.secondaryAColor.withAlphaComponent(0.8).cgColor)
         ctx.addPath(thumbPath.cgPath)
         ctx.fillPath()
         

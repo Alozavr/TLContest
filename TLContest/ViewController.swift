@@ -62,6 +62,13 @@ class ViewController: UIViewController, ViewControllerWithTable {
                 self?.tableView.reloadData()
             }
         }
+        tableView.setupThemeNotification()
+        navigationController?.navigationBar.setupThemeNotification()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        ThemeManager.shared.setupTheme()
     }
     
     func registerCells() {
@@ -95,6 +102,10 @@ extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell")!
         cell.textLabel?.text = "Chart #\(indexPath.section + 1)"
+        cell.contentView.backgroundColor = Colors.shared.primaryColor
+        cell.backgroundColor = Colors.shared.primaryColor
+        cell.textLabel?.textColor = Colors.shared.textColor
+        cell.setupThemeNotification()
         return cell
     }
 }

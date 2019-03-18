@@ -19,7 +19,7 @@ class DetailedChartView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         let chartView = RangedChartView()
-        chartView.backgroundColor = .white
+        chartView.backgroundColor = Colors.shared.primaryColor
         
         addSubview(chartView)
         
