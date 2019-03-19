@@ -53,10 +53,10 @@ class ButtonCell: UITableViewCell {
         self.button = button
         
         NSLayoutConstraint.activate([
-            button.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            button.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            button.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            button.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
+            button.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0),
+            button.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
+            button.topAnchor.constraint(equalTo: topAnchor, constant: 0),
+            button.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 0),
             ])
     }
     

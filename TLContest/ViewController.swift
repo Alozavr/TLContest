@@ -64,6 +64,7 @@ class ViewController: UIViewController, ViewControllerWithTable {
         }
         tableView.setupThemeNotification()
         navigationController?.navigationBar.setupThemeNotification()
+        navigationController?.navigationBar.tintColor = Colors.shared.textColor
     }
     
     override func viewWillAppear(_ animated: Bool) {

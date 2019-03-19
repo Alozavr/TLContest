@@ -99,7 +99,7 @@ extension ChartDetailsViewController: UITableViewDelegate {
         } else if indexPath.section == 0 {
             return 44
         } else if indexPath.section == 1, indexPath.row == 0 {
-            return 60
+            return 44
         }
         return 1
     }

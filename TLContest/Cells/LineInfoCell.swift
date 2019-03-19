@@ -60,6 +60,7 @@ class LineInfoCell: UITableViewCell {
     private func initLabelView() {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = Colors.shared.textColor
         addSubview(label)
         self.nameLabel = label
         

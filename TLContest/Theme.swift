@@ -97,7 +97,7 @@ extension UIView {
                 } else if let chartView = subview as? ChartOverview {
                     chartView.overview.backgroundColor = Colors.shared.primaryColor
                     chartView.slider.backgroundColor = .clear
-                    chartView.slider.lowerValue = chartView.slider.lowerValue
+                    chartView.slider.updateLayerFrames()
                 } else if let graph = subview as? DetailedChartView {
                     graph.backgroundColor = Colors.shared.primaryColor
                     graph.chartView.backgroundColor = Colors.shared.primaryColor
@@ -106,6 +106,8 @@ extension UIView {
         } else if let navBar = self as? UINavigationBar {
             navBar.backgroundColor = Colors.shared.primaryColor
             navBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: Colors.shared.textColor]
+            navBar.tintColor = Colors.shared.textColor
+            navBar.barTintColor = Colors.shared.primaryColor
         }
     }
     
