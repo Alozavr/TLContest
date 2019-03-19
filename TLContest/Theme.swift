@@ -53,13 +53,58 @@ extension NSNotification.Name {
     static var updateTheme = NSNotification.Name("UpdateThemeNotification")
 }
 
+final class Deallocator {
+    var closure: () -> Void
+    init(_ closure: @escaping () -> Void) {
+        self.closure = closure
+    }
+    deinit {
+        closure()
+    }
+}
+
+private var associatedObjectAddr = ""
+
 extension UIView {
     
-    func setupThemeNotification() {
+    open override func method(for aSelector: Selector!) -> IMP! {
+        if self is UINavigationBar, aSelector == #selector(UINavigationBar.draw(_:)) {
+            setupThemeNotification()
+        }
+        return super.method(for: aSelector)
+    }
+    
+    @objc convenience init(tl_frame: CGRect) {
+        self.init(tl_frame: tl_frame)
+        let deallocator = Deallocator { [weak self] in
+            self?.removeThemeNotification()
+        }
+        objc_setAssociatedObject(self, &associatedObjectAddr, deallocator, .OBJC_ASSOCIATION_RETAIN)
+        setupThemeNotification()
+    }
+    
+    static func swizzleInitImplementation() {
+        let originalSelector = #selector(UIView.init(frame:))
+        let swizzledSelector = #selector(UIView.init(tl_frame:))
+
+        guard let originalMethod = class_getInstanceMethod(self, originalSelector),
+        let swizzledMethod = class_getInstanceMethod(self, swizzledSelector) else {
+            fatalError("The methods are not found!")
+        }
+
+        let didAddMethod = class_addMethod(self, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod))
+        if didAddMethod {
+            class_replaceMethod(self, swizzledSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod))
+        } else {
+            method_exchangeImplementations(originalMethod, swizzledMethod);
+        }
+    }
+    
+    private func setupThemeNotification() {
         NotificationCenter.default.addObserver(self, selector: #selector(updateTheme), name: NSNotification.Name.updateTheme, object: nil)
     }
     
-    fileprivate func removeThemeNotification() {
+    private func removeThemeNotification() {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.updateTheme, object: nil)
     }
     
@@ -110,5 +155,4 @@ extension UIView {
             navBar.barTintColor = Colors.shared.primaryColor
         }
     }
-    
 }

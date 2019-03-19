@@ -27,7 +27,6 @@ class ButtonCell: UITableViewCell {
     }
     
     private func setupView() {
-        setupThemeNotification()
         initButtonView()
         selectionStyle = .none
         contentView.backgroundColor = Colors.shared.primaryColor

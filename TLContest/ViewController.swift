@@ -62,8 +62,6 @@ class ViewController: UIViewController, ViewControllerWithTable {
                 self?.tableView.reloadData()
             }
         }
-        tableView.setupThemeNotification()
-        navigationController?.navigationBar.setupThemeNotification()
         navigationController?.navigationBar.tintColor = Colors.shared.textColor
     }
     
@@ -106,7 +104,6 @@ extension ViewController: UITableViewDataSource {
         cell.contentView.backgroundColor = Colors.shared.primaryColor
         cell.backgroundColor = Colors.shared.primaryColor
         cell.textLabel?.textColor = Colors.shared.textColor
-        cell.setupThemeNotification()
         return cell
     }
 }

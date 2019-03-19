@@ -26,7 +26,6 @@ class ChartDetailsViewController: UIViewController, ViewControllerWithTable {
         navigationController?.interactivePopGestureRecognizer?.delegate = self
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         title = "Statistics"
-        tableView.setupThemeNotification()
     }
     
     override func viewWillAppear(_ animated: Bool) {

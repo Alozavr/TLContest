@@ -29,7 +29,6 @@ class ChartOverviewCell: UITableViewCell {
     }
 
     private func initChart() {
-        setupThemeNotification()
         selectionStyle = .none
         contentView.backgroundColor = Colors.shared.primaryColor
         backgroundColor = Colors.shared.primaryColor
