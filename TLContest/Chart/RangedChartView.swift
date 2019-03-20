@@ -63,22 +63,14 @@ class RangedChartView: UIControl {
         }
         
         self.visibleLines = lines
-        let joinedYValues = lines.reduce([], { $0 + $1.values.map({ CGFloat($0) })})
-        guard let max = joinedYValues.max()/*, let min = joinedYValues.min()*/ else { return }
-        // MARK: Delete if need to start Y axis not from 0
-        let min: CGFloat = 0
         
-        for (index, line) in lines.enumerated() {
-            let lineCoefficients = line.values.map({ CGFloat($0) }).map({ ($0 - min) / (max - min) })
-            self.lineCoefficients[index] = lineCoefficients
-            guard lineCoefficients.count == xAxisCoefficients.count else { continue }
-            let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
+        for line in lines {
             guard let view = layer.sublayers?.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
-                createLineView(line: line, coefficients: coefficients)
+                createLineView(line: line, coefficients: [])
                 continue
             }
             if view.opacity == 0 { view.animateAppearence() }
-            view.coefficients = coefficients
+            view.updatePath()
         }
     }
     
@@ -95,6 +87,7 @@ class RangedChartView: UIControl {
         let lineView = LineView(frame: self.bounds, line: line, coefficients: coefficients)
         layer.addSublayer(lineView)
         lineView.animateAppearence()
+        lineView.lineDelegate = self
     }
     
     
@@ -304,6 +297,25 @@ class RangedChartView: UIControl {
         return textLayer
     }
     
+}
+
+extension RangedChartView: LineViewDelegate {
+    func getCoefficients(forLine lineView: LineView) -> [(x: CGFloat, y: CGFloat)] {
+        guard let lineElement = visibleLines.enumerated().first(where: { $0.element.id == lineView.line.id }) else {
+            return []
+        }
+        let line = lineElement.element
+        let index = lineElement.offset
+        
+        guard let max = visibleLines.flatMap({ $0.values }).max() else { return [] }
+        let min: CGFloat = 0
+        
+        let lineCoefficients = line.values.map({ CGFloat($0) }).map({ ($0 - min) / (CGFloat(max) - min) })
+        self.lineCoefficients[index] = lineCoefficients
+        guard lineCoefficients.count == xAxisCoefficients.count else { return [] }
+        let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
+        return coefficients
+    }
 }
 
 extension Collection {

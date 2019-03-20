@@ -8,8 +8,14 @@
 
 import UIKit
 
+protocol LineViewDelegate: class {
+    func getCoefficients(forLine lineView: LineView) -> [(x: CGFloat, y: CGFloat)]
+}
+
 class LineView: CAShapeLayer {
 
+    weak var lineDelegate: LineViewDelegate?
+    
     var oldPath: UIBezierPath?
     var line: Line
     var coefficients: [(x: CGFloat, y: CGFloat)] {
@@ -48,6 +54,8 @@ class LineView: CAShapeLayer {
         let path = UIBezierPath()
         let rect = self.bounds
         let lineWidth: CGFloat = 1.0
+        
+        let coefficients = lineDelegate?.getCoefficients(forLine: self) ?? self.coefficients
         let points = coefficients.map({ CGPoint(x: $0 * rect.width, y: rect.height - $1 * rect.height) })
         
         path.lineWidth = lineWidth

@@ -78,27 +78,27 @@ class ChartOverviewCell: UITableViewCell {
             let lowerBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.lowerValue))
             let upperBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.upperValue))
             
-            var newDateAxis = oldDateAxis
-            if upperBoundIndex > lowerBoundIndex, oldDateAxis.count >= upperBoundIndex {
-                newDateAxis = Array(oldDateAxis[lowerBoundIndex..<upperBoundIndex])
-            }
-            
-            var lines: [Line] = []
-            for line in chart.lines {
-                var newLine = line
-                if upperBoundIndex > lowerBoundIndex, line.values.count >= upperBoundIndex {
-                    let newValues = Array(newLine.values[lowerBoundIndex..<upperBoundIndex])
-                    newLine = Line(id: line.id,
-                                   name: line.name,
-                                   values: newValues,
-                                   color: line.color,
-                                   isVisible: line.isVisible)
-                }
-                lines.append(newLine)
-            }
-            
-            let newChart = Chart(dateAxis: newDateAxis, lines: lines)
-            graph.chartView.displayFullChart(newChart)
+//            var newDateAxis = oldDateAxis
+//            if upperBoundIndex > lowerBoundIndex, oldDateAxis.count >= upperBoundIndex {
+//                newDateAxis = Array(oldDateAxis[lowerBoundIndex..<upperBoundIndex])
+//            }
+//
+//            var lines: [Line] = []
+//            for line in chart.lines {
+//                var newLine = line
+//                if upperBoundIndex > lowerBoundIndex, line.values.count >= upperBoundIndex {
+//                    let newValues = Array(newLine.values[lowerBoundIndex..<upperBoundIndex])
+//                    newLine = Line(id: line.id,
+//                                   name: line.name,
+//                                   values: newValues,
+//                                   color: line.color,
+//                                   isVisible: line.isVisible)
+//                }
+//                lines.append(newLine)
+//            }
+//
+//            let newChart = Chart(dateAxis: newDateAxis, lines: lines)
+            graph.chartView.displayChart(withRange: ClosedRange(uncheckedBounds: (lowerBoundIndex, upperBoundIndex)))
         }
     }
 }
