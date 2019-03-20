@@ -16,17 +16,29 @@ class RangedChartView: UIControl {
     var visibleLines: [Line] = []
     var lineCoefficients: [Int: [CGFloat]] = [:]
     
-    func displayChart(chart: Chart) {
-        if chart.dateAxis != dateAxis {
+    var fullChart: Chart = Chart(dateAxis: [], lines: [])
+    var selectedRange: ClosedRange = ClosedRange(uncheckedBounds: (0, 0))
+    
+    func displayFullChart(_ chart: Chart) {
+        self.fullChart = chart
+        let lowerRage = 0
+        let upperRange = chart.dateAxis.count
+        let selectedRange = ClosedRange(uncheckedBounds: (lowerRage, upperRange))
+        displayChart(withRange: selectedRange)
+    }
+    
+    func displayChart(withRange range: ClosedRange<Int>) {
+        let newDateAxis = Array(fullChart.dateAxis[range.lowerBound..<range.upperBound])
+        if newDateAxis != dateAxis {
             xAxisCoefficients.removeAll()
         }
-        
-        self.dateAxis = chart.dateAxis
-        calculateXAxisCoefficients(chart)
+        self.selectedRange = range
+        self.dateAxis = newDateAxis
+        calculateXAxisCoefficients(range: range)
         
         let viewsToRemove = layer.sublayers?.compactMap { (subView) -> LineView? in
             guard let lineView = subView as? LineView else { return nil }
-            guard let line = chart.lines.first(where: { $0.id == lineView.line.id }) else {
+            guard let line = fullChart.lines.first(where: { $0.id == lineView.line.id }) else {
                 return nil
             }
             lineView.line = line
@@ -37,7 +49,19 @@ class RangedChartView: UIControl {
             view.animateDisappearence(removeOnComplete: false)
         }
         
-        let lines = chart.lines.filter { $0.isVisible }
+        var lines = fullChart.lines.filter { $0.isVisible }
+        
+        for index in lines.indices {
+            let line = lines[index]
+            let newValues = Array(line.values[range.lowerBound..<range.upperBound])
+            let newLine = Line(id: line.id,
+                               name: line.name,
+                               values: newValues,
+                               color: line.color,
+                               isVisible: line.isVisible)
+            lines[index] = newLine
+        }
+        
         self.visibleLines = lines
         let joinedYValues = lines.reduce([], { $0 + $1.values.map({ CGFloat($0) })})
         guard let max = joinedYValues.max()/*, let min = joinedYValues.min()*/ else { return }
@@ -74,12 +98,12 @@ class RangedChartView: UIControl {
     }
     
     
-    private func calculateXAxisCoefficients(_ chart: Chart) {
+    private func calculateXAxisCoefficients(range: ClosedRange<Int>) {
         guard xAxisCoefficients.isEmpty,
-            let lastDate = chart.dateAxis.last?.timeIntervalSince1970,
-            let firstDate = chart.dateAxis.first?.timeIntervalSince1970 else { return }
+            let lastDate = fullChart.dateAxis[safe: range.upperBound - 1]?.timeIntervalSince1970,
+            let firstDate = fullChart.dateAxis[safe: range.lowerBound]?.timeIntervalSince1970 else { return }
         
-        xAxisCoefficients = chart.dateAxis.map({ CGFloat( ($0.timeIntervalSince1970 - firstDate) / (lastDate - firstDate)) })
+        xAxisCoefficients = fullChart.dateAxis[range.lowerBound..<range.upperBound].map({ CGFloat( ($0.timeIntervalSince1970 - firstDate) / (lastDate - firstDate)) })
     }
     
     // MARK: - Touches
@@ -280,4 +304,12 @@ class RangedChartView: UIControl {
         return textLayer
     }
     
+}
+
+extension Collection {
+    
+    /// Returns the element at the specified index iff it is within bounds, otherwise nil.
+    public subscript (safe index: Index) -> Iterator.Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
 }

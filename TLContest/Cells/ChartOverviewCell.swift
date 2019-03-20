@@ -54,7 +54,7 @@ class ChartOverviewCell: UITableViewCell {
         graph.heightAnchor.constraint(equalToConstant: 200).isActive = true
         
         chartView.topAnchor.constraint(equalTo: topAnchor, constant: 200 + 32).isActive = true
-        chartView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        chartView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16).isActive = true
         chartView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16).isActive = true
         chartView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16).isActive = true
         chartView.heightAnchor.constraint(equalToConstant: 64).isActive = true
@@ -98,7 +98,7 @@ class ChartOverviewCell: UITableViewCell {
             }
             
             let newChart = Chart(dateAxis: newDateAxis, lines: lines)
-            graph.chartView.displayChart(chart: newChart)
+            graph.chartView.displayFullChart(newChart)
         }
     }
 }

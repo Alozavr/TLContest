@@ -33,11 +33,11 @@ class DetailedChartView: UIView {
     init(frame: CGRect, chart: Chart) {
         super.init(frame: frame)
         backgroundColor = .clear
-        chartView.displayChart(chart: chart)
+        chartView.displayFullChart(chart)
     }
     
     func displayChart(_ chart: Chart) {
-        chartView.displayChart(chart: chart)
+        chartView.displayFullChart(chart)
     }
     
 }
