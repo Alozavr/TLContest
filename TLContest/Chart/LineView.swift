@@ -64,20 +64,20 @@ class LineView: CAShapeLayer {
 //        removeAnimation(forKey: "animationKey")
         
 //        print("lala: scheldued")
-        CATransaction.begin()
-//        CATransaction.setCompletionBlock {
-//            print("lala: animation completed")
-//        }
-        
+//        CATransaction.begin()
+////        CATransaction.setCompletionBlock {
+////            print("lala: animation completed")
+////        }
+//        
         oldPath = path
         self.path = path.cgPath
-        let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.path))
-        pathAnimation.fromValue = previousPath.cgPath
-        pathAnimation.toValue = path.cgPath
-        pathAnimation.duration = 0.3
-        pathAnimation.fillMode = .both
-//        pathAnimation.beginTime = CACurrentMediaTime() + 0.2
-        add(pathAnimation, forKey:"animationKey")
-        CATransaction.commit()
+//        let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.path))
+//        pathAnimation.fromValue = previousPath.cgPath
+//        pathAnimation.toValue = path.cgPath
+//        pathAnimation.duration = 0.3
+//        pathAnimation.fillMode = .both
+////        pathAnimation.beginTime = CACurrentMediaTime() + 0.2
+//        add(pathAnimation, forKey:"animationKey")
+//        CATransaction.commit()
     }
 }

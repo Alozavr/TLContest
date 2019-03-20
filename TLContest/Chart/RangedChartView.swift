@@ -16,6 +16,8 @@ class RangedChartView: UIControl {
     var visibleLines: [Line] = []
     var lineCoefficients: [Int: [CGFloat]] = [:]
     
+    var previousMax: CGFloat = 0.0
+    
     func displayChart(chart: Chart) {
         if chart.dateAxis != dateAxis {
             xAxisCoefficients.removeAll()
@@ -56,6 +58,66 @@ class RangedChartView: UIControl {
             if view.opacity == 0 { view.animateAppearence() }
             view.coefficients = coefficients
         }
+        
+        var isAnimateFromTopToBottom: Bool = false
+        
+        if max > previousMax {
+            isAnimateFromTopToBottom = true
+        } else if max < previousMax {
+            isAnimateFromTopToBottom = false
+        } else {
+            return
+        }
+        
+        self.previousMax = max
+        
+        removeTempLayers(inArray: tempLineLayers)
+        tempLineLayers.removeAll()
+        
+        let linesCount = 5
+        let yLabelInterval = max / CGFloat(linesCount)
+        for i in 1...linesCount {
+            let y = bounds.height / CGFloat(linesCount) * CGFloat(i)
+            let labelHeight: CGFloat = 20.0
+            let inset: CGFloat = 8.0
+            
+            let title = String(format: "%d", Int(yLabelInterval * CGFloat(linesCount - i)))
+            let labelFrame = CGRect(x: inset,
+                                    y: y - labelHeight,
+                                    width: CGFloat(title.count) * 12.0,
+                                    height: labelHeight)
+            
+            let container = CAShapeLayer()
+            container.frame = labelFrame
+            let textLayer = getLabelLayer(title: title,
+                                          frame: labelFrame,
+                                          font: .systemFont(ofSize: 12.0),
+                                          color: Colors.shared.secondaryAColor,
+                                          alignment: .left)
+            container.addSublayer(textLayer)
+            layer.addSublayer(container)
+            
+            let lineLayer = CAShapeLayer()
+            let linePath = UIBezierPath()
+            linePath.move(to: CGPoint(x: inset,
+                                       y: y))
+            linePath.addLine(to: CGPoint(x: bounds.width,
+                                     y: y))
+            linePath.lineWidth = 1.0
+            lineLayer.strokeColor = Colors.shared.secondaryAColor.cgColor
+            lineLayer.path = linePath.cgPath
+            layer.addSublayer(lineLayer)
+
+            tempLineLayers.append(lineLayer)
+            tempLineLayers.append(container)
+            
+            lineLayer.animateOpacityWithPosition(with: 0.3,
+                                                 isAnimateFromTopToBottom: isAnimateFromTopToBottom,
+                                                 index: i)
+            textLayer.animateOpacityWithPosition(with: 0.3,
+                                                 isAnimateFromTopToBottom: isAnimateFromTopToBottom,
+                                                 index: i)
+        }
     }
     
     override func layoutSubviews() {
@@ -78,7 +140,6 @@ class RangedChartView: UIControl {
         guard xAxisCoefficients.isEmpty,
             let lastDate = chart.dateAxis.last?.timeIntervalSince1970,
             let firstDate = chart.dateAxis.first?.timeIntervalSince1970 else { return }
-        
         xAxisCoefficients = chart.dateAxis.map({ CGFloat( ($0.timeIntervalSince1970 - firstDate) / (lastDate - firstDate)) })
     }
     
@@ -86,6 +147,7 @@ class RangedChartView: UIControl {
     
     private var previousLocation = CGPoint()
     private var tempLayers: [CALayer] = []
+    private var tempLineLayers: [CALayer] = []
     private let impact = UIImpactFeedbackGenerator(style: .light)
     private var previousX: CGFloat = 0.0
     
@@ -106,7 +168,7 @@ class RangedChartView: UIControl {
             let coeffIndex = xAxisCoefficients.index(ofElement: coeff) else  {
             return true
         }
-            
+        
         let x = coeff *  bounds.width
         
         if previousX != x {
@@ -184,7 +246,6 @@ class RangedChartView: UIControl {
                 sublayer.removeFromSuperlayer()
             }
         }
-        tempLayers.removeAll()
     }
     
     func drawLine(onLayer layer: CALayer, fromPoint start: CGPoint, toPoint end: CGPoint) {

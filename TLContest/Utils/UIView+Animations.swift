@@ -51,4 +51,30 @@ extension CALayer {
         self.add(animation, forKey: "disapperAnimation")
         CATransaction.commit()
     }
+    
+    func animateOpacityWithPosition(with duration: TimeInterval = 0.3, isAnimateFromTopToBottom: Bool, index: Int) {
+        let groupAnimation = CAAnimationGroup()
+        
+        let opacityAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.opacity))
+        opacityAnimation.fromValue = 0.0
+        opacityAnimation.toValue = 1.0
+        opacityAnimation.duration = duration
+        
+        let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.position))
+        
+        if isAnimateFromTopToBottom {
+            pathAnimation.fromValue = CGPoint(x: position.x, y: position.y - 20 * CGFloat(index))
+            pathAnimation.toValue = CGPoint(x: position.x, y: position.y)
+        } else {
+            pathAnimation.fromValue = CGPoint(x: position.x, y: position.y + 20 * CGFloat(index))
+            pathAnimation.toValue = CGPoint(x: position.x, y: position.y)
+        }
+        
+        pathAnimation.duration = duration * Double(index)
+        pathAnimation.fillMode = .both
+        
+        groupAnimation.animations = [pathAnimation, opacityAnimation]
+        
+        add(groupAnimation, forKey: nil)
+    }
 }
