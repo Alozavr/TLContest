@@ -18,13 +18,151 @@ class RangedChartView: UIControl {
     
     var fullChart: Chart = Chart(dateAxis: [], lines: [])
     var selectedRange: ClosedRange = ClosedRange(uncheckedBounds: (0, 0))
+    var allCoefficients: [(x: CGFloat, y: CGFloat)] = []
     
+    var displayLink: CADisplayLink!
+    var previousTimestamp: CFTimeInterval = 0
+    var currentTimestamp: CFTimeInterval = 0
+    var currentAnimations = [GraphPointAnimation]()
+    
+    var graphPoints: [String: [GraphPoint]] = [:]
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setup()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        displayLink?.invalidate()
+    }
+    
+    internal func setup() {
+        displayLink = CADisplayLink(target: self, selector: #selector(animationUpdate))
+        displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.common)
+        displayLink.isPaused = true
+    }
+    
+    internal func reset() {
+        currentAnimations.removeAll()
+//        graphPoints.removeAll()
+        displayLink?.invalidate()
+        previousTimestamp = 0
+        currentTimestamp = 0
+    }
+    
+    internal func invalidate() {
+        currentAnimations.removeAll()
+//        graphPoints.removeAll()
+        displayLink?.invalidate()
+    }
+    
+    @objc private func animationUpdate() {
+        let dt = timeSinceLastFrame()
+        
+        for animation in currentAnimations {
+            animation.update(withTimestamp: dt)
+        
+            if animation.finished {
+                dequeue(animation: animation)
+            }
+        }
+        
+        for line in visibleLines {
+            guard let view = layer.sublayers?
+                .compactMap({ $0 as? LineView })
+                .first(where: { $0.line.id == line.id }) else {
+                    return
+            }
+            view.updatePath()
+        }
+    }
+    
+    func animatePlotPointPositions() {
+        let delay: Double = 0.01
+        
+        for line in visibleLines {
+            var dataIndex = 0
+            
+            let newPoints = getCoefficients(forLine: line)
+                .map({ CGPoint(x: $0 * bounds.width, y: bounds.height - $1 * bounds.height) })
+            
+            for (index, newPoint) in newPoints.enumerated() {
+                let graphPoint = ((graphPoints[line.id]) ?? [])[safe: index] ?? GraphPoint(position: .zero)
+                animate(point: graphPoint, to: newPoint, withDelay: Double(dataIndex) * delay)
+                dataIndex += 1
+            }
+        }
+    }
+    
+    private func animate(point: GraphPoint, to position: CGPoint, withDelay delay: Double = 0) {
+        let currentPoint = CGPoint(x: point.x, y: point.y)
+        let animation = GraphPointAnimation(fromPoint: currentPoint, toPoint: position, forGraphPoint: point)
+        animation.animationEasing = Easings.easeOutQuad
+        animation.duration = 0.1
+        animation.delay = delay
+        enqueue(animation: animation)
+    }
+    
+    private func enqueue(animation: GraphPointAnimation) {
+        if (currentAnimations.count == 0) {
+            // Need to kick off the loop.
+            displayLink.isPaused = false
+        }
+        currentAnimations.append(animation)
+    }
+    
+    private func dequeue(animation: GraphPointAnimation) {
+        if let index = currentAnimations.index(of: animation) {
+            currentAnimations.remove(at: index)
+        }
+        
+        if currentAnimations.count == 0 {
+            // Stop animation loop.
+            displayLink.isPaused = true
+        }
+    }
+    
+    private func timeSinceLastFrame() -> Double {
+        if previousTimestamp == 0 {
+            previousTimestamp = displayLink.timestamp
+        } else {
+            previousTimestamp = currentTimestamp
+        }
+
+        currentTimestamp = displayLink.timestamp
+
+        var dt = currentTimestamp - previousTimestamp
+
+        if dt > 0.032 {
+            dt = 0.032
+        }
+
+        return dt
+    }
+
     func displayFullChart(_ chart: Chart) {
         self.fullChart = chart
         let lowerRage = 0
         let upperRange = chart.dateAxis.count
         let selectedRange = ClosedRange(uncheckedBounds: (lowerRage, upperRange))
+        self.selectedRange = selectedRange
         displayChart(withRange: selectedRange)
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == #keyPath(UIControl.frame) {
+            if let newFrame = change?[.newKey] as? CGRect, !newFrame.isEmpty {
+                for line in fullChart.lines {
+                    graphPoints[line.id] = getAllCoefficients(forLine: line, inChart: fullChart)
+                        .map({ CGPoint(x: $0 * bounds.width, y: bounds.height - $1 * bounds.height) })
+                        .map({ GraphPoint(position: $0) })
+                }
+            }
+        }
     }
     
     func displayChart(withRange range: ClosedRange<Int>) {
@@ -70,13 +208,14 @@ class RangedChartView: UIControl {
                 continue
             }
             if view.opacity == 0 { view.animateAppearence() }
-            view.updatePath()
+            animatePlotPointPositions()
         }
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         guard let sublayers = layer.sublayers else { return }
+        addObserver(self, forKeyPath: #keyPath(UIControl.frame), options: [.new, .initial], context: nil)
         for layer in sublayers {
             layer.frame = self.bounds
             layer.setNeedsDisplay()
@@ -300,8 +439,27 @@ class RangedChartView: UIControl {
 }
 
 extension RangedChartView: LineViewDelegate {
-    func getCoefficients(forLine lineView: LineView) -> [(x: CGFloat, y: CGFloat)] {
-        guard let lineElement = visibleLines.enumerated().first(where: { $0.element.id == lineView.line.id }) else {
+    func getPoints(forLine line: Line) -> [CGPoint] {
+        let points = (graphPoints[line.id] ?? [])
+        let selectedPoints = points[selectedRange.lowerBound..<selectedRange.upperBound]
+            .map({ $0.location })
+        
+        calculateXAxisCoefficients(range: selectedRange)
+        
+        guard let max = visibleLines.flatMap({ $0.values }).max() else { return [] }
+        let min: CGFloat = 0
+        
+        let lineCoefficients = line.values[selectedRange.lowerBound..<selectedRange.upperBound].map({ CGFloat($0) }).map({ ($0 - min) / (CGFloat(max) - min) })
+        guard lineCoefficients.count == xAxisCoefficients.count else { return [] }
+        let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
+        
+        let transformedPoints = zip(selectedPoints, xAxisCoefficients).map({ CGPoint(x: $0.0.x * $0.1, y: $0.0.y) })
+        
+        return transformedPoints
+    }
+    
+    func getCoefficients(forLine line: Line) -> [(x: CGFloat, y: CGFloat)] {
+        guard let lineElement = visibleLines.enumerated().first(where: { $0.element.id == line.id }) else {
             return []
         }
         let line = lineElement.element
@@ -314,6 +472,34 @@ extension RangedChartView: LineViewDelegate {
         self.lineCoefficients[index] = lineCoefficients
         guard lineCoefficients.count == xAxisCoefficients.count else { return [] }
         let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
+        
+        return coefficients
+    }
+    
+    func getAllCoefficients(forLine line: Line, inChart chart: Chart) -> [(x: CGFloat, y: CGFloat)] {
+        guard let lineElement = chart.lines.enumerated().first(where: { $0.element.id == line.id }) else {
+            return []
+        }
+        let line = lineElement.element
+        let index = lineElement.offset
+        
+        guard let max = chart.lines.flatMap({ $0.values }).max() else { return [] }
+        let min: CGFloat = 0
+        
+        let lineCoefficients = line.values.map({ CGFloat($0) }).map({ ($0 - min) / (CGFloat(max) - min) })
+        self.lineCoefficients[index] = lineCoefficients
+        
+        guard let lastDate = chart.dateAxis.last?.timeIntervalSince1970,
+        let firstDate = chart.dateAxis.first?.timeIntervalSince1970 else { return [] }
+        
+        let xAxisCoefficients = chart.dateAxis
+            .map({ CGFloat( ($0.timeIntervalSince1970 - firstDate) / (lastDate - firstDate)) })
+        
+        guard lineCoefficients.count == xAxisCoefficients.count else { return [] }
+        let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
+        
+        self.allCoefficients = coefficients
+        
         return coefficients
     }
 }

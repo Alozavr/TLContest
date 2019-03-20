@@ -1,6 +1,6 @@
 import UIKit
 
-internal class GraphPointAnimation: Equatable {
+class GraphPointAnimation: Equatable {
     
     // Public Properties
     var animationEasing = Easings.easeOutQuad
