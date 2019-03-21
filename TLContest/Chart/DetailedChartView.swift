@@ -30,14 +30,4 @@ class DetailedChartView: UIView {
         self.chartView = chartView
     }
     
-    init(frame: CGRect, chart: Chart) {
-        super.init(frame: frame)
-        backgroundColor = .clear
-        chartView.displayChart(chart: chart)
-    }
-    
-    func displayChart(_ chart: Chart) {
-        chartView.displayChart(chart: chart)
-    }
-    
 }

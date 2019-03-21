@@ -52,7 +52,7 @@ extension ChartDetailsViewController: UITableViewDataSource {
             return cell
         } else if indexPath.section == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "LineInfoCell") as! LineInfoCell
-            let line = chart.lines[indexPath.row - 1]
+            let line = chart.lines.sorted(by: { $0.name < $1.name })[indexPath.row - 1]
             cell.configure(color: line.color, text: line.name, isChecked: line.isVisible)
             return cell
         } else if indexPath.section == 1, indexPath.row == 0 {

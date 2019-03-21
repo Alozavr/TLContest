@@ -18,7 +18,7 @@ class RangedChartView: UIControl {
     
     var previousMax: CGFloat = 0.0
     
-    func displayChart(chart: Chart, yRange: ClosedRange<Int>? = nil) {
+    func displayChart(chart: Chart, yRange: ClosedRange<Int>) {
         if chart.dateAxis != dateAxis {
             xAxisCoefficients.removeAll()
         }
@@ -34,18 +34,15 @@ class RangedChartView: UIControl {
             lineView.line = line
             return !line.isVisible ? lineView : nil
             } ?? []
-        
         for view in viewsToRemove {
             view.animateDisappearence(removeOnComplete: false)
         }
         
         let lines = chart.lines.filter { $0.isVisible }
+        let willAnimate = lines.count != visibleLines.count
         self.visibleLines = lines
 
-        var valuesArray: [Int] = chart.lines.flatMap({ $0.values })
-        if let range = yRange {
-            valuesArray = chart.lines.flatMap({ $0.values[range] })
-        }
+        let valuesArray = visibleLines.compactMap({ $0.values[yRange].max() })
         guard let tempmax = valuesArray.max()/*, let min = joinedYValues.min()*/ else { return }
         // MARK: Delete if need to start Y axis not from 0
         let max = CGFloat(tempmax)
@@ -60,12 +57,13 @@ class RangedChartView: UIControl {
                 createLineView(line: line, coefficients: coefficients)
                 continue
             }
+            view.shouldAnimate = willAnimate
             if view.opacity == 0 { view.animateAppearence() }
             view.coefficients = coefficients
         }
         
         var isAnimateFromTopToBottom: Bool = false
-        
+
         if max > previousMax {
             isAnimateFromTopToBottom = true
         } else if max < previousMax {
@@ -73,25 +71,25 @@ class RangedChartView: UIControl {
         } else {
             return
         }
-        
+
         self.previousMax = max
-        
+
         removeTempLayers(inArray: tempLineLayers)
         tempLineLayers.removeAll()
-        
+
         let linesCount = 5
         let yLabelInterval = max / CGFloat(linesCount)
         for i in 1...linesCount {
             let y = bounds.height / CGFloat(linesCount) * CGFloat(i)
             let labelHeight: CGFloat = 20.0
             let inset: CGFloat = 8.0
-            
+
             let title = String(format: "%d", Int(yLabelInterval * CGFloat(linesCount - i)))
             let labelFrame = CGRect(x: inset,
                                     y: y - labelHeight,
                                     width: CGFloat(title.count) * 12.0,
                                     height: labelHeight)
-            
+
             let container = CAShapeLayer()
             container.frame = labelFrame
             let textLayer = getLabelLayer(title: title,
@@ -101,7 +99,7 @@ class RangedChartView: UIControl {
                                           alignment: .left)
             container.addSublayer(textLayer)
             layer.addSublayer(container)
-            
+
             let lineLayer = CAShapeLayer()
             let linePath = UIBezierPath()
             linePath.move(to: CGPoint(x: inset,
@@ -115,7 +113,7 @@ class RangedChartView: UIControl {
 
             tempLineLayers.append(lineLayer)
             tempLineLayers.append(container)
-            
+
             lineLayer.animateOpacityWithPosition(with: 0.3,
                                                  isAnimateFromTopToBottom: isAnimateFromTopToBottom,
                                                  index: i)

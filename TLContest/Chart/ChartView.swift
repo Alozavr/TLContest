@@ -11,7 +11,8 @@ import UIKit
 class ChartView: UIView {
     
     var xAxisCoefficients: [CGFloat] = []
-    
+    var visibleLines: [Line] = []
+
     func displayChart(chart: Chart) {
         calculateXAxisCoefficients(chart)
         
@@ -29,9 +30,13 @@ class ChartView: UIView {
         }
         
         let lines = chart.lines.filter { $0.isVisible }
-        let joinedYValues = lines.reduce([], { $0 + $1.values.map({ CGFloat($0) })})
-        guard let max = joinedYValues.max()/*, let min = joinedYValues.min() */else { return }
+        let willAnimate = lines.count != visibleLines.count
+        visibleLines = lines
+        
+        let joinedYValues = lines.compactMap({ $0.values.max() })
+        guard let tempMax = joinedYValues.max()/*, let min = joinedYValues.min() */else { return }
         // MARK: Delete if need to start Y axis not from 0
+        let max = CGFloat(tempMax)
         let min: CGFloat = 0
 
         for line in lines {
@@ -42,6 +47,7 @@ class ChartView: UIView {
                 createLineView(line: line, coefficients: coefficients)
                 continue
             }
+            view.shouldAnimate = willAnimate
             if view.opacity == 0 { view.animateAppearence() }
             view.coefficients = coefficients
         }

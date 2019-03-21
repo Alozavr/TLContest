@@ -12,6 +12,7 @@ class LineView: CAShapeLayer {
 
     var oldPath: UIBezierPath?
     var line: Line
+    var shouldAnimate = false
     var coefficients: [(x: CGFloat, y: CGFloat)] {
         didSet {
             setNeedsDisplay()
@@ -71,7 +72,7 @@ class LineView: CAShapeLayer {
             path.addLine(to: point)
         }
         
-        guard let previousPath = oldPath, oldPath != path else {
+        guard let previousPath = oldPath, shouldAnimate else {
             oldPath = path
             self.path = path.cgPath
             return
@@ -79,20 +80,20 @@ class LineView: CAShapeLayer {
 //        removeAnimation(forKey: "animationKey")
         
 //        print("lala: scheldued")
-//        CATransaction.begin()
-////        CATransaction.setCompletionBlock {
-////            print("lala: animation completed")
-////        }
-//        
+        CATransaction.begin()
+//        CATransaction.setCompletionBlock {
+//            print("lala: animation completed")
+//        }
+//
         oldPath = path
         self.path = path.cgPath
-//        let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.path))
-//        pathAnimation.fromValue = previousPath.cgPath
-//        pathAnimation.toValue = path.cgPath
-//        pathAnimation.duration = 0.3
-//        pathAnimation.fillMode = .both
-////        pathAnimation.beginTime = CACurrentMediaTime() + 0.2
-//        add(pathAnimation, forKey:"animationKey")
-//        CATransaction.commit()
+        let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.path))
+        pathAnimation.fromValue = previousPath.cgPath
+        pathAnimation.toValue = path.cgPath
+        pathAnimation.duration = 0.3
+        pathAnimation.fillMode = .both
+//        pathAnimation.beginTime = CACurrentMediaTime() + 0.2
+        add(pathAnimation, forKey:"animationKey")
+        CATransaction.commit()
     }
 }

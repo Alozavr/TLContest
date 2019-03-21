@@ -27,7 +27,7 @@ class ChartOverviewCell: UITableViewCell {
         super.init(coder: aDecoder)
         initChart()
     }
-
+    
     private func initChart() {
         selectionStyle = .none
         contentView.backgroundColor = Colors.shared.primaryColor
@@ -64,21 +64,23 @@ class ChartOverviewCell: UITableViewCell {
     
     func setChart(_ chart: Chart) {
         self.chart = chart
-        graph.displayChart(chart)
+        graph.chartView.displayChart(chart: chart, yRange: sliderRange())
         chartView.displayChart(chart)
-        sliderDidChangeValue()
+    }
+    
+    func sliderRange() -> ClosedRange<Int> {
+        let oldDateAxis = self.chart.dateAxis
+        var lowerBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.lowerValue)) - 1
+        let upperBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.upperValue)) - 1
+        if lowerBoundIndex < 0 {
+            lowerBoundIndex = 0
+        }
+        return lowerBoundIndex...upperBoundIndex
     }
     
     @objc func sliderDidChangeValue() {
         if fabs(previousLowerRangeValue - chartView.slider.lowerValue) > 0.05 ||
             fabs(previousUpperRangeValue - chartView.slider.upperValue) > 0.05 {
-            let oldDateAxis = self.chart.dateAxis
-            
-            var lowerBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.lowerValue)) - 1
-            let upperBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.upperValue)) - 1
-            if lowerBoundIndex < 0 {
-                lowerBoundIndex = 0
-            }
             
             let floatLower = CGFloat(chartView.slider.lowerValue)
             let floatUpper = CGFloat(chartView.slider.upperValue)
@@ -87,13 +89,13 @@ class ChartOverviewCell: UITableViewCell {
             let timesToIncreaseFrame = 1.0 / CGFloat(percentOfVisible)
             
             let lineViews = graph.chartView.layer.sublayers?.compactMap({ $0 as? LineView }) ?? []
-//            CATransaction.begin()
-//            CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
-//            CATransaction.setValue(NSNumber.init(value: 0.0), forKey: kCATransactionAnimationDuration)
+            //            CATransaction.begin()
+            //            CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
+            //            CATransaction.setValue(NSNumber.init(value: 0.0), forKey: kCATransactionAnimationDuration)
             let actionsToDisableMovements = [
                 "bounds": NSNull(),
                 "position": NSNull()
-                ]
+            ]
             for lineView in lineViews {
                 var newFrame = lineView.frame
                 newFrame.origin.x = -graph.chartView.frame.width * floatLower * timesToIncreaseFrame
@@ -101,9 +103,9 @@ class ChartOverviewCell: UITableViewCell {
                 lineView.frame = newFrame
                 lineView.actions = actionsToDisableMovements
             }
-//            CATransaction.commit()
-            graph.chartView.displayChart(chart: chart, yRange: lowerBoundIndex...upperBoundIndex)
-
+            //            CATransaction.commit()
+            graph.chartView.displayChart(chart: chart, yRange: sliderRange())
+            
         }
     }
 }
