@@ -34,7 +34,7 @@ class ChartOverviewCell: UITableViewCell {
         backgroundColor = Colors.shared.primaryColor
         
         let graph = DetailedChartView()
-        graph.clipsToBounds = true
+        graph.layer.masksToBounds = true
         graph.backgroundColor = Colors.shared.primaryColor
         graph.translatesAutoresizingMaskIntoConstraints = false
         addSubview(graph)
@@ -80,18 +80,28 @@ class ChartOverviewCell: UITableViewCell {
                 lowerBoundIndex = 0
             }
             
-            let percentOfVisible = chartView.slider.upperValue - chartView.slider.lowerValue
-            let timesToIncreaseFrame = CGFloat(1.0 / percentOfVisible)
+            let floatLower = CGFloat(chartView.slider.lowerValue)
+            let floatUpper = CGFloat(chartView.slider.upperValue)
+            
+            let percentOfVisible = floatUpper - floatLower
+            let timesToIncreaseFrame = 1.0 / CGFloat(percentOfVisible)
             
             let lineViews = graph.chartView.layer.sublayers?.compactMap({ $0 as? LineView }) ?? []
-            CATransaction.begin()
-//            CATransaction.setValue(true, forKey: kCATransactionDisableActions)
-            CATransaction.setValue(NSNumber.init(value: 0.1), forKey: kCATransactionAnimationDuration)
+//            CATransaction.begin()
+//            CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
+//            CATransaction.setValue(NSNumber.init(value: 0.0), forKey: kCATransactionAnimationDuration)
+            let actionsToDisableMovements = [
+                "bounds": NSNull(),
+                "position": NSNull()
+                ]
             for lineView in lineViews {
-                lineView.bounds.size.width = graph.chartView.frame.width * timesToIncreaseFrame
-                lineView.frame.origin.x = -graph.chartView.frame.width * CGFloat(chartView.slider.lowerValue) * timesToIncreaseFrame
+                var newFrame = lineView.frame
+                newFrame.origin.x = -graph.chartView.frame.width * floatLower * timesToIncreaseFrame
+                newFrame.size.width = graph.chartView.frame.width * timesToIncreaseFrame
+                lineView.frame = newFrame
+                lineView.actions = actionsToDisableMovements
             }
-            CATransaction.commit()
+//            CATransaction.commit()
             graph.chartView.displayChart(chart: chart, yRange: lowerBoundIndex...upperBoundIndex)
 
         }

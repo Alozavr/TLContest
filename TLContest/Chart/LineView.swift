@@ -56,7 +56,7 @@ class LineView: CAShapeLayer {
         if indexOfLastVisiblePoint != allPoints.endIndex - 1 {
             indexOfLastVisiblePoint += 1
         }
-        
+
         let points = allPoints[indexOfPreviousPoint...indexOfLastVisiblePoint]
         
         path.lineWidth = lineWidth
