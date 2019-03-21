@@ -42,7 +42,22 @@ class LineView: CAShapeLayer {
         let path = UIBezierPath()
         let rect = bounds
         let lineWidth: CGFloat = 1.0
-        let points = coefficients.map({ CGPoint(x: $0 * rect.width, y: rect.height - $1 * rect.height) })
+        let allPoints = coefficients.map({ CGPoint(x: $0 * rect.width, y: rect.height - $1 * rect.height) })
+        
+        guard var indexOfPreviousPoint = allPoints.firstIndex(where: { $0.x + frame.origin.x >= 0 }) else {
+            return
+        }
+        if indexOfPreviousPoint != 0 {
+            indexOfPreviousPoint -= 1
+        }
+        guard let superlayer = superlayer, var indexOfLastVisiblePoint = allPoints.lastIndex(where: { $0.x + frame.origin.x <= superlayer.bounds.width }) else {
+            return
+        }
+        if indexOfLastVisiblePoint != allPoints.endIndex - 1 {
+            indexOfLastVisiblePoint += 1
+        }
+        
+        let points = allPoints[indexOfPreviousPoint...indexOfLastVisiblePoint]
         
         path.lineWidth = lineWidth
         strokeColor = line.color.cgColor

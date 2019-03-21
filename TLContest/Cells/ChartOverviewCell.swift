@@ -85,9 +85,9 @@ class ChartOverviewCell: UITableViewCell {
             
             let lineViews = graph.chartView.layer.sublayers?.compactMap({ $0 as? LineView }) ?? []
             CATransaction.begin()
-            CATransaction.setValue(true, forKey: kCATransactionDisableActions)
+//            CATransaction.setValue(true, forKey: kCATransactionDisableActions)
+            CATransaction.setValue(NSNumber.init(value: 0.1), forKey: kCATransactionAnimationDuration)
             for lineView in lineViews {
-                
                 lineView.bounds.size.width = graph.chartView.frame.width * timesToIncreaseFrame
                 lineView.frame.origin.x = -graph.chartView.frame.width * CGFloat(chartView.slider.lowerValue) * timesToIncreaseFrame
             }
