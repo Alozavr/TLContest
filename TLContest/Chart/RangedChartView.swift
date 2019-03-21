@@ -18,7 +18,7 @@ class RangedChartView: UIControl {
     
     var previousMax: CGFloat = 0.0
     
-    func displayChart(chart: Chart) {
+    func displayChart(chart: Chart, yRange: ClosedRange<Int>? = nil) {
         if chart.dateAxis != dateAxis {
             xAxisCoefficients.removeAll()
         }
@@ -41,13 +41,18 @@ class RangedChartView: UIControl {
         
         let lines = chart.lines.filter { $0.isVisible }
         self.visibleLines = lines
-        let joinedYValues = lines.reduce([], { $0 + $1.values.map({ CGFloat($0) })})
-        guard let max = joinedYValues.max()/*, let min = joinedYValues.min()*/ else { return }
+
+        var valuesArray: [Int] = chart.lines.flatMap({ $0.values })
+        if let range = yRange {
+            valuesArray = chart.lines.flatMap({ $0.values[range] })
+        }
+        guard let tempmax = valuesArray.max()/*, let min = joinedYValues.min()*/ else { return }
         // MARK: Delete if need to start Y axis not from 0
+        let max = CGFloat(tempmax)
         let min: CGFloat = 0
         
         for (index, line) in lines.enumerated() {
-            let lineCoefficients = line.values.map({ CGFloat($0) }).map({ ($0 - min) / (max - min) })
+            let lineCoefficients = line.values.map({ (CGFloat($0) - min) / (max - min) })
             self.lineCoefficients[index] = lineCoefficients
             guard lineCoefficients.count == xAxisCoefficients.count else { continue }
             let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
@@ -124,6 +129,7 @@ class RangedChartView: UIControl {
         super.layoutSubviews()
         guard let sublayers = layer.sublayers else { return }
         for layer in sublayers {
+            guard layer.frame.isEmpty else { continue }
             layer.frame = self.bounds
             layer.setNeedsDisplay()
         }

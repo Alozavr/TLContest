@@ -40,7 +40,7 @@ class LineView: CAShapeLayer {
     
     override func draw(in ctx: CGContext) {
         let path = UIBezierPath()
-        let rect = ctx.boundingBoxOfClipPath
+        let rect = bounds
         let lineWidth: CGFloat = 1.0
         let points = coefficients.map({ CGPoint(x: $0 * rect.width, y: rect.height - $1 * rect.height) })
         

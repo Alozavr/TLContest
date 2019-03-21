@@ -34,12 +34,13 @@ class ChartOverviewCell: UITableViewCell {
         backgroundColor = Colors.shared.primaryColor
         
         let graph = DetailedChartView()
+        graph.clipsToBounds = true
         graph.backgroundColor = Colors.shared.primaryColor
         graph.translatesAutoresizingMaskIntoConstraints = false
         addSubview(graph)
         
         let chartView = ChartOverview()
-        chartView.slider.lowerValue = 0.8
+        chartView.slider.lowerValue = 0.0
         chartView.slider.upperValue = 1.0
         chartView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(chartView)
@@ -73,30 +74,26 @@ class ChartOverviewCell: UITableViewCell {
             fabs(previousUpperRangeValue - chartView.slider.upperValue) > 0.05 {
             let oldDateAxis = self.chart.dateAxis
             
-            let lowerBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.lowerValue))
-            let upperBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.upperValue))
-            
-            var newDateAxis = oldDateAxis
-            if upperBoundIndex > lowerBoundIndex, oldDateAxis.count >= upperBoundIndex {
-                newDateAxis = Array(oldDateAxis[lowerBoundIndex..<upperBoundIndex])
+            var lowerBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.lowerValue)) - 1
+            let upperBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.upperValue)) - 1
+            if lowerBoundIndex < 0 {
+                lowerBoundIndex = 0
             }
             
-            var lines: [Line] = []
-            for line in chart.lines {
-                var newLine = line
-                if upperBoundIndex > lowerBoundIndex, line.values.count >= upperBoundIndex {
-                    let newValues = Array(newLine.values[lowerBoundIndex..<upperBoundIndex])
-                    newLine = Line(id: line.id,
-                                   name: line.name,
-                                   values: newValues,
-                                   color: line.color,
-                                   isVisible: line.isVisible)
-                }
-                lines.append(newLine)
-            }
+            let percentOfVisible = chartView.slider.upperValue - chartView.slider.lowerValue
+            let timesToIncreaseFrame = CGFloat(1.0 / percentOfVisible)
             
-            let newChart = Chart(dateAxis: newDateAxis, lines: lines)
-            graph.chartView.displayChart(chart: newChart)
+            let lineViews = graph.chartView.layer.sublayers?.compactMap({ $0 as? LineView }) ?? []
+            CATransaction.begin()
+            CATransaction.setValue(true, forKey: kCATransactionDisableActions)
+            for lineView in lineViews {
+                
+                lineView.bounds.size.width = graph.chartView.frame.width * timesToIncreaseFrame
+                lineView.frame.origin.x = -graph.chartView.frame.width * CGFloat(chartView.slider.lowerValue) * timesToIncreaseFrame
+            }
+            CATransaction.commit()
+            graph.chartView.displayChart(chart: chart, yRange: lowerBoundIndex...upperBoundIndex)
+
         }
     }
 }
