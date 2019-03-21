@@ -19,6 +19,8 @@ class LineView: CAShapeLayer {
         }
     }
     
+    var calculatedPoints: [CGPoint] = []
+    
     override init(layer: Any) {
         let layer = layer as! LineView
         self.line = layer.line
@@ -71,6 +73,8 @@ class LineView: CAShapeLayer {
         for point in points.dropFirst() {
             path.addLine(to: point)
         }
+        
+        self.calculatedPoints = Array(points)
         
         guard let previousPath = oldPath, shouldAnimate else {
             oldPath = path

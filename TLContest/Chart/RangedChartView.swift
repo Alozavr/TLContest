@@ -15,10 +15,13 @@ class RangedChartView: UIControl {
     var dateAxis: [Date] = []
     var visibleLines: [Line] = []
     var lineCoefficients: [Int: [CGFloat]] = [:]
+    var currentRange = ClosedRange<Int>(uncheckedBounds: (0, 0))
     
     var previousMax: CGFloat = 0.0
     
     func displayChart(chart: Chart, yRange: ClosedRange<Int>) {
+        currentRange = yRange
+        
         if chart.dateAxis != dateAxis {
             xAxisCoefficients.removeAll()
         }
@@ -165,15 +168,23 @@ class RangedChartView: UIControl {
         
         previousLocation = location
         
-        let characteristicSize: CGFloat = 1.0 / CGFloat(xAxisCoefficients.count)
+        let characteristicSize: CGFloat = bounds.width / CGFloat(currentRange.upperBound - currentRange.lowerBound + 1)
         let delta: CGFloat = characteristicSize
         
-        guard let coeff = xAxisCoefficients.filter({ $0 > location.x / bounds.width - delta && $0 < location.x / bounds.width + delta }).first,
-            let coeffIndex = xAxisCoefficients.index(ofElement: coeff) else  {
+        guard let view = layer.sublayers?
+            .compactMap({ $0 as? LineView })
+            .first(where: { $0.line.id == visibleLines.first?.id }) else {
+                return true
+        }
+        
+        guard let coeffIndex = view.calculatedPoints.index(where: { $0.x > location.x - delta && $0.x < location.x + delta }) else  {
             return true
         }
         
-        let x = coeff *  bounds.width
+        let correctRange = ClosedRange(uncheckedBounds: (max(currentRange.lowerBound, 0),
+                                                         max(currentRange.upperBound, coeffIndex)))
+        
+        let x = view.calculatedPoints[coeffIndex].x
         
         if previousX != x {
             removeTempInfoLayers()
@@ -186,15 +197,17 @@ class RangedChartView: UIControl {
         let endPoint = CGPoint(x: x, y: 16)
         drawLine(onLayer: layer, fromPoint: startingPoint, toPoint: endPoint)
         
-        let maxValue = visibleLines.compactMap({ $0.values[coeffIndex] }).max() ?? 0
+        let maxValue = visibleLines.compactMap({ Array($0.values[correctRange])[coeffIndex] }).max() ?? 0
         let numberOfDigits = "\(maxValue)".count
         let infoHeight: CGFloat = max(20.0 * CGFloat(visibleLines.count), 40.0)
         let infoWidth: CGFloat = max(60 + CGFloat(numberOfDigits) * 12.0, 80.0)
         let infoSize = CGSize(width: infoWidth, height: infoHeight)
-        let date = dateAxis[coeffIndex]
         
-        let minPointX: CGFloat = -8.0
-        let maxPointX = bounds.width - infoWidth + 8.0
+        let datesAxis = Array(dateAxis[correctRange])
+        let date = datesAxis[coeffIndex]
+        
+        let minPointX: CGFloat = -2.0
+        let maxPointX = bounds.width - infoWidth - 2.0
         
         drawInfo(onLayer: layer,
                  atPoint: CGPoint(x: max(min(x - infoWidth / 2.0, maxPointX), minPointX), y: 16),
@@ -203,17 +216,14 @@ class RangedChartView: UIControl {
                  lines: visibleLines,
                  currentValueIndex: coeffIndex)
         
-        for (index, line) in visibleLines.enumerated() {
-            guard line.values.count > coeffIndex,
-                let yCoefficients = lineCoefficients[index],
-                yCoefficients.count > coeffIndex else {
-                continue
+        for line in visibleLines {
+            guard let view = layer.sublayers?
+                .compactMap({ $0 as? LineView })
+                .first(where: { $0.line.id == line.id }) else {
+                    return true
             }
             
-            let yCoeff = yCoefficients[coeffIndex]
-            
-            let y = bounds.height - yCoeff * bounds.height
-            let point = CGPoint(x: x, y: y)
+            let point = view.calculatedPoints[coeffIndex]
             
             let circleLayer = CAShapeLayer()
             let circleSize: CGFloat = 4.0
