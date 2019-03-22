@@ -79,15 +79,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         self.visibleLines = lines
         guard let tempMax = lines.compactMap({ $0.values[yRange].max() }).max()/*, let min = joinedYValues.min()*/ else { return }
         var max = CGFloat(tempMax)
-        
-        var isAnimateFromTopToBottom: Bool = false
-        
-        if max > previousMax {
-            isAnimateFromTopToBottom = true
-        } else if max < previousMax {
-            isAnimateFromTopToBottom = false
-        }
-        
+                
         if max != previousMax && previousMax != 0 {
             animator.startAnimation(startValue: previousMax, endValue: max)
             previousMax = max
@@ -109,56 +101,9 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
             }
             view.shouldAnimate = willAnimate
             if view.opacity == 0 { view.animateAppearence() }
+            
             view.xCoefficients = xAxisCoefficients
             view.updatePath()
-        }
-
-        removeTempLayers(inArray: tempLineLayers)
-        tempLineLayers.removeAll()
-
-        let linesCount = 5
-        let yLabelInterval = max / CGFloat(linesCount)
-        for i in 1...linesCount {
-            let y = bounds.height / CGFloat(linesCount) * CGFloat(i)
-            let labelHeight: CGFloat = 20.0
-            let inset: CGFloat = 8.0
-
-            let title = String(format: "%d", Int(yLabelInterval * CGFloat(linesCount - i)))
-            let labelFrame = CGRect(x: inset,
-                                    y: y - labelHeight,
-                                    width: CGFloat(title.count) * 12.0,
-                                    height: labelHeight)
-
-            let container = CAShapeLayer()
-            container.frame = labelFrame
-            let textLayer = getLabelLayer(title: title,
-                                          frame: labelFrame,
-                                          font: .systemFont(ofSize: 12.0),
-                                          color: Colors.shared.secondaryAColor,
-                                          alignment: .left)
-            container.addSublayer(textLayer)
-            layer.addSublayer(container)
-
-            let lineLayer = CAShapeLayer()
-            let linePath = UIBezierPath()
-            linePath.move(to: CGPoint(x: inset,
-                                       y: y))
-            linePath.addLine(to: CGPoint(x: bounds.width,
-                                     y: y))
-            linePath.lineWidth = 1.0
-            lineLayer.strokeColor = Colors.shared.secondaryAColor.cgColor
-            lineLayer.path = linePath.cgPath
-            layer.addSublayer(lineLayer)
-
-            tempLineLayers.append(lineLayer)
-            tempLineLayers.append(container)
-
-            lineLayer.animateOpacityWithPosition(with: 0.3,
-                                                 isAnimateFromTopToBottom: isAnimateFromTopToBottom,
-                                                 index: i)
-            textLayer.animateOpacityWithPosition(with: 0.3,
-                                                 isAnimateFromTopToBottom: isAnimateFromTopToBottom,
-                                                 index: i)
         }
     }
     
@@ -189,7 +134,6 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
     
     private var previousLocation = CGPoint()
     private var tempLayers: [CALayer] = []
-    private var tempLineLayers: [CALayer] = []
     private let impact = UIImpactFeedbackGenerator(style: .light)
     private var previousX: CGFloat = 0.0
     

@@ -64,7 +64,7 @@ class ChartOverviewCell: UITableViewCell {
     
     func setChart(_ chart: Chart) {
         self.chart = chart
-        graph.chartView.displayChart(chart: chart, yRange: sliderRange())
+        graph.displayChart(chart: chart, yRange: sliderRange())
         chartView.displayChart(chart)
     }
     
@@ -104,7 +104,7 @@ class ChartOverviewCell: UITableViewCell {
                 lineView.actions = actionsToDisableMovements
             }
             //            CATransaction.commit()
-            graph.chartView.displayChart(chart: chart, yRange: sliderRange())
+            graph.displayChart(chart: chart, yRange: sliderRange())
             
         }
     }
