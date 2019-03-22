@@ -185,58 +185,6 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         xAxisCoefficients = chart.dateAxis.map({ CGFloat( ($0.timeIntervalSince1970 - firstDate) / (lastDate - firstDate)) })
     }
     
-    private func findMaxY(in lines: [Line], with range: ClosedRange<Int>) -> CGFloat? {
-        var frameOfLine2 = layer.sublayers?.first?.frame
-        if range.count == xAxisCoefficients.count {
-            frameOfLine2 = self.frame
-        }
-        guard let frameOfLine = frameOfLine2 else { return nil }
-        let lowestBound = range.lowerBound == 0 ? range.lowerBound : range.lowerBound - 1
-        let upperBound = range.upperBound == xAxisCoefficients.count - 1 ? range.upperBound : range.upperBound + 1
-        
-        let leftBorderX = abs(frameOfLine.origin.x)
-        let possibleLeftX = xAxisCoefficients[lowestBound] * frameOfLine.width
-        let originalLeftX = xAxisCoefficients[range.lowerBound] * frameOfLine.width
-        var maxLeftY: CGFloat?
-        
-        if possibleLeftX != originalLeftX, let fd = dateAxis.first?.timeIntervalSince1970, let ld = dateAxis.last?.timeIntervalSince1970 {
-            let R = leftBorderX - possibleLeftX
-            let leftDateOfCrossing = (R * CGFloat(ld - fd) / frameOfLine.width) + CGFloat(dateAxis[lowestBound].timeIntervalSince1970)
-            
-            for line in lines {
-                let x1 = CGFloat(dateAxis[lowestBound].timeIntervalSince1970)
-                let y1 = CGFloat(line.values[lowestBound])
-                let x2 = CGFloat(dateAxis[range.lowerBound].timeIntervalSince1970)
-                let y2 = CGFloat(line.values[range.lowerBound])
-                let x3 = leftDateOfCrossing
-                let y3: CGFloat = 0.0
-                let x4 = x3
-                let y4: CGFloat = 1
-                
-                let crossY = findCrossingYBetween(x1: x1, y1: y1, x2: x2, y2: y2, x3: x3, y3: y3, x4: x4, y4: y4)
-                if crossY > 0 {
-                    maxLeftY = max(maxLeftY ?? 0, crossY)
-                }
-            }
-        }
-        
-        guard let intMaxInValues = lines.compactMap({ $0.values[range].max() }).max() else {
-            return nil
-        }
-        let maxOfVisible = CGFloat(intMaxInValues)
-        
-        guard let maxInvisibleY = maxLeftY else {
-            return maxOfVisible
-        }
-        return max(maxOfVisible, maxInvisibleY)
-    }
-    
-    private func findCrossingYBetween(x1: CGFloat, y1: CGFloat, x2: CGFloat, y2: CGFloat, x3: CGFloat, y3: CGFloat, x4: CGFloat, y4: CGFloat) -> CGFloat {
-        let up = (x1*y2 - y1*x2)*(y3 - y4) - (y1-y2)*(x3*y4 - x4*y3)
-        let down = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)
-        return up/down
-    }
-    
     // MARK: - Touches
     
     private var previousLocation = CGPoint()
