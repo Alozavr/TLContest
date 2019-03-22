@@ -15,7 +15,6 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
     var dateAxis: [Date] = []
     var visibleLines: [Line] = []
     var lineCoefficients: [Int: [CGFloat]] = [:]
-    var scrollLayer = CAScrollLayer()
     var currentRange = ClosedRange<Int>(uncheckedBounds: (0, 0))
     
     var animator: HeightAnimator!
@@ -25,17 +24,14 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
     override init(frame: CGRect = .zero) {
         super.init(frame: frame)
         animator = HeightAnimator(startValue: 0, endValue: 0, delegate: self)
-        layer.addSublayer(scrollLayer)
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         animator = HeightAnimator(startValue: 0, endValue: 0, delegate: self)
-        layer.addSublayer(scrollLayer)
     }
     
     func needsRedraw(currentHeight: CGFloat) {
-        print("currentValue: \(currentHeight)")
         redrawLines(maxHeight: currentHeight)
     }
     
@@ -46,7 +42,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
             let lineCoefficients = line.values.map({ (CGFloat($0) - min) / (maxHeight - min) })
             self.lineCoefficients[index] = lineCoefficients
             guard lineCoefficients.count == xAxisCoefficients.count else { continue }
-            guard let view = scrollLayer.sublayers?.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
+            guard let view = layer.sublayers?.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
                 continue
             }
             if view.opacity == 0 { view.animateAppearence() }
@@ -57,10 +53,10 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
     
     func displayChart(chart: Chart, yRange: ClosedRange<Int>) {
         currentRange = yRange
-
-//        if chart.dateAxis != dateAxis {
-//            xAxisCoefficients.removeAll()
-//        }
+        
+        if chart.dateAxis != dateAxis {
+            xAxisCoefficients.removeAll()
+        }
         
         self.dateAxis = chart.dateAxis
         calculateXAxisCoefficients(chart)
@@ -73,6 +69,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
             lineView.line = line
             return !line.isVisible ? lineView : nil
             } ?? []
+        
         for view in viewsToRemove {
             view.animateDisappearence(removeOnComplete: false)
         }
@@ -81,7 +78,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         let willAnimate = lines.count != visibleLines.count
         self.visibleLines = lines
         guard let tempMax = lines.compactMap({ $0.values[yRange].max() }).max()/*, let min = joinedYValues.min()*/ else { return }
-        let max = CGFloat(tempMax)
+        var max = CGFloat(tempMax)
         
         var isAnimateFromTopToBottom: Bool = false
         
@@ -97,7 +94,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
             return
         }
         previousMax = max
-        if animator.isAnimating { return }
+        if animator.isAnimating { max = animator.currentValue }
         // MARK: Delete if need to start Y axis not from 0
         let min: CGFloat = 0
         
@@ -106,7 +103,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
             self.lineCoefficients[index] = lineCoefficients
             guard lineCoefficients.count == xAxisCoefficients.count else { continue }
             let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
-            guard let view = scrollLayer.sublayers?.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
+            guard let view = layer.sublayers?.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
                 createLineView(line: line, coefficients: coefficients)
                 continue
             }
@@ -173,17 +170,11 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
             layer.frame = self.bounds
             layer.setNeedsDisplay()
         }
-        guard let lineSublayers = scrollLayer.sublayers else { return }
-        for layer in lineSublayers {
-            guard layer.frame.isEmpty else { continue }
-            layer.frame = self.bounds
-            layer.setNeedsDisplay()
-        }
     }
     
     private func createLineView(line: Line, coefficients: [(x: CGFloat, y: CGFloat)]) {
         let lineView = LineView(frame: self.bounds, line: line, coefficients: coefficients)
-        scrollLayer.addSublayer(lineView)
+        layer.addSublayer(lineView)
         lineView.animateAppearence()
     }
     

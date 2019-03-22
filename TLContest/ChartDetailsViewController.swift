@@ -81,10 +81,11 @@ extension ChartDetailsViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: false)
         guard indexPath.section == 0, indexPath.row > 0 else { return }
         let cell = tableView.cellForRow(at: indexPath) as? LineInfoCell
-        let line = chart.lines[indexPath.row - 1]
+        var sortedLines = chart.lines.sorted(by: {$0.name < $1.name})
+        let line = sortedLines[indexPath.row - 1]
         cell?.setIsChecked(!line.isVisible)
         let newLine = Line.init(id: line.id, name: line.name, values: line.values, color: line.color, isVisible: !line.isVisible)
-        var newLines = chart.lines
+        var newLines = sortedLines
         newLines[indexPath.row - 1] = newLine
         chart = Chart(dateAxis: chart.dateAxis, lines: newLines)
         

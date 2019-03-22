@@ -47,22 +47,14 @@ class HeightAnimator {
     }
     
     func startAnimation(startValue: CGFloat, endValue: CGFloat) {
-        print("START: \(startValue), end: \(endValue)")
         if startValue == endValue { return }
         
         let animation = (startPoint: startValue, endPoint: endValue)
-        defer {
-            animations.append(animation)
+        if !isAnimating {
+            self.startValue = animation.startPoint
+            currentValue = startValue
         }
-        if animations.isEmpty {
-            continueWithAnimation(animation)
-        }
-    }
-    
-    func continueWithAnimation(_ animation: Animation) {
-        self.startValue = animation.startPoint
         self.endValue = animation.endPoint
-        currentValue = startValue
         isAnimating = true
         previousTimestamp = 0
         elapsedTime = 0
@@ -78,7 +70,6 @@ class HeightAnimator {
         
         let dt = displayLink.timestamp - previousTimestamp
         elapsedTime += dt
-        print("elapsedTime: \(elapsedTime)")
         if elapsedTime >= animationDuration {
             delegate?.needsRedraw(currentHeight: endValue)
             stopAnimation()
@@ -94,18 +85,13 @@ class HeightAnimator {
             return
         }
         delegate?.needsRedraw(currentHeight: currentValue)
-        print("=======")
     }
     
     private func stopAnimation() {
-        animations.remove(at: animations.startIndex)
         displayLink.isPaused = true
         isAnimating = false
         previousTimestamp = 0
         elapsedTime = 0
-        if let nextAnimation = animations.first {
-            continueWithAnimation(nextAnimation)
-        }
     }
     
     
