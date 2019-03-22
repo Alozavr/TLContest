@@ -18,6 +18,7 @@ class DetailedChartView: UIView {
     private var cachedMax: CGFloat = 0.0
     private var cachedIsAnimateFromTopToBottom: Bool = false
     private var cachedIsBoundsUpdated: Bool = false
+    private var dateFormatters = DateFormatters()
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == #keyPath(UIView.bounds),
@@ -62,6 +63,8 @@ class DetailedChartView: UIView {
         showLinesAndTextIfNeeded(chart: chart, yRange: yRange)
         chartView.displayChart(chart: chart, yRange: yRange)
     }
+    
+    // MARK: Y Lines
     
     func showLinesAndTextIfNeeded(chart: Chart, yRange: ClosedRange<Int>) {
         var isAnimateFromTopToBottom: Bool = false

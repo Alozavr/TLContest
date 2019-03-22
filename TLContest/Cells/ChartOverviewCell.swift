@@ -47,7 +47,7 @@ class ChartOverviewCell: UITableViewCell {
         
         chartView.slider.addTarget(self, action: #selector(sliderDidChangeValue), for: .valueChanged)
         
-        graph.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        graph.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
         graph.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16).isActive = true
         graph.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16).isActive = true
         graph.heightAnchor.constraint(equalToConstant: 200).isActive = true

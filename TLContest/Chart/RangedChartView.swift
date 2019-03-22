@@ -88,7 +88,6 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         }
         previousMax2 = max
         if animator.isAnimating { max = animator.currentValue }
-        // MARK: Delete if need to start Y axis not from 0
         let min: CGFloat = 0
         
         for (index, line) in lines.enumerated() {
@@ -105,8 +104,78 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
             
             view.xCoefficients = xAxisCoefficients
             view.updatePath()
+            
+            
+            // MARK: - Create Date Labels
+            
+            removeTempLayers(inArray: tempXAxisLayers)
+            tempXAxisLayers.removeAll()
+            
+            let calculatedPoints: [CGPoint] = Array(view.calculatedPoints
+                .map({ CGPoint(x: $0.x + view.frame.origin.x, y: $0.y) })
+                .filter({ $0.x >= 0.0 && $0.x <= view.frame.width - view.frame.origin.x }).dropLast())
+            
+            let points = Array(calculatedPoints)
+            
+            var neededElements: [CGPoint] = []
+            
+            for (index, point) in points.enumerated() {
+                if index % 4 == 0 {
+                    neededElements.append(point)
+                } else if index == points.count - 1 {
+                    neededElements.append(point)
+                } else if index == points.count / 2 {
+                    neededElements.append(point)
+                } else if index == 0 {
+                    neededElements.append(point)
+                }
+            }
+            
+            var datesAxis = dateAxis
+            
+            if yRange.upperBound - yRange.lowerBound + 1 >= points.count {
+                datesAxis = Array(dateAxis[yRange])
+            }
+            
+            var textXLayers: [CALayer] = []
+            
+            let neededElementsFittedScreen = neededElements.filter({ $0.x < bounds.width })
+            
+            let maximumFittedElementsOnScreen = 5
+            
+            if neededElementsFittedScreen.count <= maximumFittedElementsOnScreen, points.count <= 16 {
+                neededElements = points
+            }
+            
+            for point in neededElementsFittedScreen {
+                guard let pointIndex = points.index(ofElement: point) else {
+                    continue
+                }
+                // рисуем лейблы
+                let date = datesAxis[pointIndex]
+                let width: CGFloat = 60
+                let height: CGFloat = 20
+                let title = dateFormatters.format(date: date)
+                let labelFrame = CGRect(x: point.x - width / 2.0,
+                                        y: bounds.height - height,
+                                        width: width,
+                                        height: height)
+                
+                let xLabel = getLabelLayer(title: title,
+                                                     frame: labelFrame,
+                                                     font: .systemFont(ofSize: 12.0),
+                                                     color: UIColor(hexString: "cbd3dd"),
+                                                     alignment: .center)
+            
+                textXLayers.append(xLabel)
+                layer.addSublayer(xLabel)
+                tempXAxisLayers.append(xLabel)
+            }
         }
+        
     }
+    
+    private var tempXAxisLayers: [CALayer] = []
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -157,24 +226,29 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
                 return true
         }
         
-        guard let coeffIndex = view.calculatedPoints.index(where: { $0.x > location.x - delta && $0.x < location.x + delta }) else  {
+        let calculatedPoints: [CGPoint] = view.calculatedPoints
+            .map({ CGPoint(x: $0.x + view.frame.origin.x, y: $0.y) })
+            .filter({ $0.x >= 0.0 && $0.x <= view.frame.width - view.frame.origin.x })
+        
+        guard let coeffIndex = calculatedPoints.index(where: { $0.x > location.x - delta && $0.x < location.x + delta }) else {
             return true
         }
         
         let correctRange = ClosedRange(uncheckedBounds: (max(currentRange.lowerBound, 0),
                                                          max(currentRange.upperBound, coeffIndex)))
         
-        let x = view.calculatedPoints[coeffIndex].x
+        let x = calculatedPoints[coeffIndex].x
+        
+        removeTempInfoLayers()
         
         if previousX != x {
-            removeTempInfoLayers()
             impact.impactOccurred()
         }
         
         previousX = x
         
         let startingPoint = CGPoint(x: x, y: bounds.size.height)
-        let endPoint = CGPoint(x: x, y: 16)
+        let endPoint = CGPoint(x: x, y: 16 + 8)
         drawLine(onLayer: layer, fromPoint: startingPoint, toPoint: endPoint)
         
         let maxValue = visibleLines.compactMap({ Array($0.values[correctRange])[coeffIndex] }).max() ?? 0
@@ -186,16 +260,6 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         let datesAxis = Array(dateAxis[correctRange])
         let date = datesAxis[coeffIndex]
         
-        let minPointX: CGFloat = -2.0
-        let maxPointX = bounds.width - infoWidth - 2.0
-        
-        drawInfo(onLayer: layer,
-                 atPoint: CGPoint(x: max(min(x - infoWidth / 2.0, maxPointX), minPointX), y: 16),
-                 withSize: infoSize,
-                 date: date,
-                 lines: visibleLines,
-                 currentValueIndex: coeffIndex)
-        
         for line in visibleLines {
             guard let view = layer.sublayers?
                 .compactMap({ $0 as? LineView })
@@ -203,7 +267,10 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
                     return true
             }
             
-            let point = view.calculatedPoints[coeffIndex]
+            let calculatedPoints: [CGPoint] = view.calculatedPoints
+                .map({ CGPoint(x: $0.x + view.frame.origin.x, y: $0.y) })
+                .filter({ $0.x >= 0.0 && $0.x <= view.frame.width - view.frame.origin.x })
+            let point = calculatedPoints[coeffIndex]
             
             let circleLayer = CAShapeLayer()
             let circleSize: CGFloat = 4.0
@@ -215,6 +282,16 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
             layer.addSublayer(circleLayer)
             tempLayers.append(circleLayer)
         }
+        
+        let minPointX: CGFloat = -2.0
+        let maxPointX = bounds.width - infoWidth
+        
+        drawInfo(onLayer: layer,
+                 atPoint: CGPoint(x: max(min(x - infoWidth / 2.0, maxPointX), minPointX), y: 16),
+                 withSize: infoSize,
+                 date: date,
+                 lines: visibleLines,
+                 currentValueIndex: coeffIndex)
         
         sendActions(for: .valueChanged)
         
@@ -250,7 +327,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         line.path = linePath.cgPath
         line.fillColor = nil
         line.opacity = 1.0
-        line.strokeColor = UIColor.lightGray.cgColor
+        line.strokeColor = UIColor(hexString: "cbd3dd").withAlphaComponent(0.2).cgColor
         layer.addSublayer(line)
         tempLayers.append(line)
     }
@@ -267,7 +344,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         let rect = CGRect(origin: point, size: size)
         let info = UIBezierPath(roundedRect: rect, cornerRadius: 8.0)
         infoLayer.path = info.cgPath
-        infoLayer.fillColor = UIColor(hexString: "FAFAFA").cgColor
+        infoLayer.fillColor = Colors.shared.backgroundColor.cgColor
         infoLayer.opacity = 1.0
         
         let commonInset: CGFloat = 4.0
@@ -285,7 +362,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         let datelLayer = getLabelLayer(title: dateText,
                                            frame: dateRect,
                                            font: UIFont.boldSystemFont(ofSize: 12.0),
-                                           color: UIColor(hexString: "77777c"),
+                                           color: Colors.shared.secondaryCColor,
                                            alignment: .left)
         infoLayer.addSublayer(datelLayer)
         
@@ -294,7 +371,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         let yearLayer = getLabelLayer(title: yearText,
                                            frame: yearRect,
                                            font: UIFont.systemFont(ofSize: 10.0),
-                                           color: UIColor(hexString: "77777c"),
+                                           color: Colors.shared.secondaryCColor,
                                            alignment: .left)
         infoLayer.addSublayer(yearLayer)
         

@@ -29,8 +29,8 @@ class ChartOverview: UIView {
         overview.translatesAutoresizingMaskIntoConstraints = false
         rangeSlider.translatesAutoresizingMaskIntoConstraints = false
         
-        overview.bindToSuperView()
-        rangeSlider.bindToSuperView()
+        overview.bindToSuperView(with: UIEdgeInsets(top: 6, left: 0, bottom: 0, right: 0))
+        rangeSlider.bindToSuperView(with: UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 1))
         
         self.overview = overview
         self.slider = rangeSlider

@@ -117,12 +117,10 @@ class RangeSliderThumbLayer: CALayer {
         
         let thumbPath = UIBezierPath(roundedRect: bounds, byRoundingCorners: corners, cornerRadii: CGSize(width: 4.0, height: 4.0))
         
-        // Fill
         ctx.setFillColor(Colors.shared.secondaryAColor.withAlphaComponent(0.8).cgColor)
         ctx.addPath(thumbPath.cgPath)
         ctx.fillPath()
         
-        // Outline
         ctx.setStrokeColor(strokeColor.cgColor)
         ctx.setLineWidth(lineWidth)
         ctx.addPath(thumbPath.cgPath)
@@ -134,7 +132,6 @@ class RangeSliderThumbLayer: CALayer {
             ctx.fillPath()
         }
         
-        // arrow
         let arrowSize: CGFloat = 8.0
         let diffByX = (bounds.width - arrowDirectionCoeff * bounds.width) / 2.0
         let startOrEndPointX = bounds.origin.x + diffByX + arrowSize * (3/2) * arrowDirectionCoeff
@@ -249,7 +246,6 @@ public class RangeSlider: UIControl {
                                       width: upperThumbLayer.frame.origin.x - lowerThumbLayer.frame.origin.x + lowerThumbLayer.frame.width,
                                       height: upperThumbLayer.frame.height)
         
-        // Hit test the thumb layers
         if lowerThumbLayer.frame.contains(previousLocation) {
             lowerThumbLayer.highlighted = true
         } else if upperThumbLayer.frame.contains(previousLocation) {
@@ -269,13 +265,11 @@ public class RangeSlider: UIControl {
     override public func continueTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
         let location = touch.location(in: self)
         
-        // Determine by how much the user has dragged
         let deltaLocation = Double(location.x - previousLocation.x)
         let deltaValue = (maximumValue - minimumValue) * deltaLocation / Double(bounds.width - bounds.height)
         
         previousLocation = location
         
-        // Update the values
         if lowerThumbLayer.highlighted, upperThumbLayer.highlighted {
             let gap = (upperValue - lowerValue) * (maximumValue - minimumValue)
             if deltaValue > 0 {
