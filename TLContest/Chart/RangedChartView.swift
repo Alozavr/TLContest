@@ -20,6 +20,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
     var animator: HeightAnimator!
     
     var previousMax: CGFloat = 0.0
+    var previousMax2: CGFloat = 0.0
     
     override init(frame: CGRect = .zero) {
         super.init(frame: frame)
@@ -80,12 +81,12 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         guard let tempMax = lines.compactMap({ $0.values[yRange].max() }).max()/*, let min = joinedYValues.min()*/ else { return }
         var max = CGFloat(tempMax)
                 
-        if max != previousMax && previousMax != 0 {
-            animator.startAnimation(startValue: previousMax, endValue: max)
-            previousMax = max
+        if max != previousMax2 && previousMax2 != 0 {
+            animator.startAnimation(startValue: previousMax2, endValue: max)
+            previousMax2 = max
             return
         }
-        previousMax = max
+        previousMax2 = max
         if animator.isAnimating { max = animator.currentValue }
         // MARK: Delete if need to start Y axis not from 0
         let min: CGFloat = 0
