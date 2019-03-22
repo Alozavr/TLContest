@@ -70,11 +70,9 @@ class ChartOverviewCell: UITableViewCell {
     
     func sliderRange() -> ClosedRange<Int> {
         let oldDateAxis = self.chart.dateAxis
-        var lowerBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.lowerValue)) - 1
+        let lowerBoundIndex = Int((Double(oldDateAxis.count) * chartView.slider.lowerValue).rounded(FloatingPointRoundingRule.up))
         let upperBoundIndex = Int(Double(oldDateAxis.count) * (chartView.slider.upperValue)) - 1
-        if lowerBoundIndex < 0 {
-            lowerBoundIndex = 0
-        }
+        
         return lowerBoundIndex...upperBoundIndex
     }
     
@@ -88,7 +86,7 @@ class ChartOverviewCell: UITableViewCell {
             let percentOfVisible = floatUpper - floatLower
             let timesToIncreaseFrame = 1.0 / CGFloat(percentOfVisible)
             
-            let lineViews = graph.chartView.layer.sublayers?.compactMap({ $0 as? LineView }) ?? []
+            let lineViews = graph.chartView.scrollLayer.sublayers?.compactMap({ $0 as? LineView }) ?? []
             //            CATransaction.begin()
             //            CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
             //            CATransaction.setValue(NSNumber.init(value: 0.0), forKey: kCATransactionAnimationDuration)
@@ -96,12 +94,18 @@ class ChartOverviewCell: UITableViewCell {
                 "bounds": NSNull(),
                 "position": NSNull()
             ]
+            
+            let scrollLayer = graph.chartView.scrollLayer
+            scrollLayer.bounds.size.width = graph.chartView.frame.width * timesToIncreaseFrame
+            scrollLayer.scroll(to: CGPoint(x: graph.chartView.frame.width * floatLower * timesToIncreaseFrame, y: 0))
+            print(scrollLayer.frame)
+//
             for lineView in lineViews {
-                var newFrame = lineView.frame
-                newFrame.origin.x = -graph.chartView.frame.width * floatLower * timesToIncreaseFrame
-                newFrame.size.width = graph.chartView.frame.width * timesToIncreaseFrame
-                lineView.frame = newFrame
-                lineView.actions = actionsToDisableMovements
+                lineView.bounds.size.width = scrollLayer.bounds.width// - scrollLayer.frame.origin.x
+//                newFrame.origin.x = -graph.chartView.frame.width * floatLower * timesToIncreaseFrame
+//                newFrame.size.width = graph.chartView.frame.width * timesToIncreaseFrame
+//                lineView.frame = newFrame
+//                lineView.actions = actionsToDisableMovements
             }
             //            CATransaction.commit()
             graph.chartView.displayChart(chart: chart, yRange: sliderRange())

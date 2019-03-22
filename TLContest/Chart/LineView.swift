@@ -13,24 +13,30 @@ class LineView: CAShapeLayer {
     var oldPath: UIBezierPath?
     var line: Line
     var shouldAnimate = false
+    var xCoefficients: [CGFloat] = []
+    var yCoefficients: [CGFloat] = []
     var coefficients: [(x: CGFloat, y: CGFloat)] {
-        didSet {
-            setNeedsDisplay()
-        }
+        return zip(xCoefficients, yCoefficients).map{ (x:$0, y:$1) }
     }
     
     var calculatedPoints: [CGPoint] = []
+    
+    func updatePath() {
+        setNeedsDisplay()
+    }
     
     override init(layer: Any) {
         let layer = layer as! LineView
         self.line = layer.line
         self.oldPath = layer.oldPath
-        self.coefficients = layer.coefficients
+        self.xCoefficients = layer.xCoefficients
+        self.yCoefficients = layer.yCoefficients
         super.init(layer: layer)
     }
     
     init(frame: CGRect, line: Line, coefficients: [(x: CGFloat, y: CGFloat)]) {
-        self.coefficients = coefficients
+        self.xCoefficients = coefficients.map({ $0.x })
+        self.yCoefficients = coefficients.map({ $0.y })
         self.line = line
         super.init()
         self.frame = frame
@@ -53,7 +59,7 @@ class LineView: CAShapeLayer {
         if indexOfPreviousPoint != 0 {
             indexOfPreviousPoint -= 1
         }
-        guard let superlayer = superlayer, var indexOfLastVisiblePoint = allPoints.lastIndex(where: { $0.x + frame.origin.x <= superlayer.bounds.width }) else {
+        guard let superlayer = superlayer?.superlayer, var indexOfLastVisiblePoint = allPoints.lastIndex(where: { $0.x + frame.origin.x <= superlayer.bounds.width }) else {
             return
         }
         if indexOfLastVisiblePoint != allPoints.endIndex - 1 {

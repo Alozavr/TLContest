@@ -49,7 +49,9 @@ class ChartView: UIView {
             }
             view.shouldAnimate = willAnimate
             if view.opacity == 0 { view.animateAppearence() }
-            view.coefficients = coefficients
+            view.xCoefficients = xAxisCoefficients
+            view.yCoefficients = lineCoefficients
+            view.updatePath()
         }
         
     }

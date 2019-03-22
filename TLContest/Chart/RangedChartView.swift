@@ -8,23 +8,59 @@
 
 import UIKit
 
-class RangedChartView: UIControl {
+class RangedChartView: UIControl, HeightAnimatorDelegate {
     
     var xAxisCoefficients: [CGFloat] = []
     
     var dateAxis: [Date] = []
     var visibleLines: [Line] = []
     var lineCoefficients: [Int: [CGFloat]] = [:]
+    var scrollLayer = CAScrollLayer()
     var currentRange = ClosedRange<Int>(uncheckedBounds: (0, 0))
+    
+    var animator: HeightAnimator!
     
     var previousMax: CGFloat = 0.0
     
+    override init(frame: CGRect = .zero) {
+        super.init(frame: frame)
+        animator = HeightAnimator(startValue: 0, endValue: 0, delegate: self)
+        layer.addSublayer(scrollLayer)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        animator = HeightAnimator(startValue: 0, endValue: 0, delegate: self)
+        layer.addSublayer(scrollLayer)
+    }
+    
+    func needsRedraw(currentHeight: CGFloat) {
+        print("currentValue: \(currentHeight)")
+        redrawLines(maxHeight: currentHeight)
+    }
+    
+    func redrawLines(maxHeight: CGFloat) {
+        let min: CGFloat = 0
+        
+        for (index, line) in visibleLines.enumerated() {
+            let lineCoefficients = line.values.map({ (CGFloat($0) - min) / (maxHeight - min) })
+            self.lineCoefficients[index] = lineCoefficients
+            guard lineCoefficients.count == xAxisCoefficients.count else { continue }
+            guard let view = scrollLayer.sublayers?.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
+                continue
+            }
+            if view.opacity == 0 { view.animateAppearence() }
+            view.yCoefficients = lineCoefficients
+            view.updatePath()
+        }
+    }
+    
     func displayChart(chart: Chart, yRange: ClosedRange<Int>) {
         currentRange = yRange
-        
-        if chart.dateAxis != dateAxis {
-            xAxisCoefficients.removeAll()
-        }
+
+//        if chart.dateAxis != dateAxis {
+//            xAxisCoefficients.removeAll()
+//        }
         
         self.dateAxis = chart.dateAxis
         calculateXAxisCoefficients(chart)
@@ -44,11 +80,25 @@ class RangedChartView: UIControl {
         let lines = chart.lines.filter { $0.isVisible }
         let willAnimate = lines.count != visibleLines.count
         self.visibleLines = lines
-
-        let valuesArray = visibleLines.compactMap({ $0.values[yRange].max() })
-        guard let tempmax = valuesArray.max()/*, let min = joinedYValues.min()*/ else { return }
+        guard let tempMax = lines.compactMap({ $0.values[yRange].max() }).max()/*, let min = joinedYValues.min()*/ else { return }
+        let max = CGFloat(tempMax)
+        
+        var isAnimateFromTopToBottom: Bool = false
+        
+        if max > previousMax {
+            isAnimateFromTopToBottom = true
+        } else if max < previousMax {
+            isAnimateFromTopToBottom = false
+        }
+        
+        if max != previousMax && previousMax != 0 {
+            animator.startAnimation(startValue: previousMax, endValue: max)
+            previousMax = max
+            return
+        }
+        previousMax = max
+        if animator.isAnimating { return }
         // MARK: Delete if need to start Y axis not from 0
-        let max = CGFloat(tempmax)
         let min: CGFloat = 0
         
         for (index, line) in lines.enumerated() {
@@ -56,26 +106,15 @@ class RangedChartView: UIControl {
             self.lineCoefficients[index] = lineCoefficients
             guard lineCoefficients.count == xAxisCoefficients.count else { continue }
             let coefficients = zip(xAxisCoefficients, lineCoefficients).map({ (x:$0, y:$1) })
-            guard let view = layer.sublayers?.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
+            guard let view = scrollLayer.sublayers?.compactMap({ $0 as? LineView }).first(where: { $0.line.id == line.id }) else {
                 createLineView(line: line, coefficients: coefficients)
                 continue
             }
             view.shouldAnimate = willAnimate
             if view.opacity == 0 { view.animateAppearence() }
-            view.coefficients = coefficients
+            view.xCoefficients = xAxisCoefficients
+            view.updatePath()
         }
-        
-        var isAnimateFromTopToBottom: Bool = false
-
-        if max > previousMax {
-            isAnimateFromTopToBottom = true
-        } else if max < previousMax {
-            isAnimateFromTopToBottom = false
-        } else {
-            return
-        }
-
-        self.previousMax = max
 
         removeTempLayers(inArray: tempLineLayers)
         tempLineLayers.removeAll()
@@ -134,20 +173,77 @@ class RangedChartView: UIControl {
             layer.frame = self.bounds
             layer.setNeedsDisplay()
         }
+        guard let lineSublayers = scrollLayer.sublayers else { return }
+        for layer in lineSublayers {
+            guard layer.frame.isEmpty else { continue }
+            layer.frame = self.bounds
+            layer.setNeedsDisplay()
+        }
     }
     
     private func createLineView(line: Line, coefficients: [(x: CGFloat, y: CGFloat)]) {
         let lineView = LineView(frame: self.bounds, line: line, coefficients: coefficients)
-        layer.addSublayer(lineView)
+        scrollLayer.addSublayer(lineView)
         lineView.animateAppearence()
     }
-    
     
     private func calculateXAxisCoefficients(_ chart: Chart) {
         guard xAxisCoefficients.isEmpty,
             let lastDate = chart.dateAxis.last?.timeIntervalSince1970,
             let firstDate = chart.dateAxis.first?.timeIntervalSince1970 else { return }
         xAxisCoefficients = chart.dateAxis.map({ CGFloat( ($0.timeIntervalSince1970 - firstDate) / (lastDate - firstDate)) })
+    }
+    
+    private func findMaxY(in lines: [Line], with range: ClosedRange<Int>) -> CGFloat? {
+        var frameOfLine2 = layer.sublayers?.first?.frame
+        if range.count == xAxisCoefficients.count {
+            frameOfLine2 = self.frame
+        }
+        guard let frameOfLine = frameOfLine2 else { return nil }
+        let lowestBound = range.lowerBound == 0 ? range.lowerBound : range.lowerBound - 1
+        let upperBound = range.upperBound == xAxisCoefficients.count - 1 ? range.upperBound : range.upperBound + 1
+        
+        let leftBorderX = abs(frameOfLine.origin.x)
+        let possibleLeftX = xAxisCoefficients[lowestBound] * frameOfLine.width
+        let originalLeftX = xAxisCoefficients[range.lowerBound] * frameOfLine.width
+        var maxLeftY: CGFloat?
+        
+        if possibleLeftX != originalLeftX, let fd = dateAxis.first?.timeIntervalSince1970, let ld = dateAxis.last?.timeIntervalSince1970 {
+            let R = leftBorderX - possibleLeftX
+            let leftDateOfCrossing = (R * CGFloat(ld - fd) / frameOfLine.width) + CGFloat(dateAxis[lowestBound].timeIntervalSince1970)
+            
+            for line in lines {
+                let x1 = CGFloat(dateAxis[lowestBound].timeIntervalSince1970)
+                let y1 = CGFloat(line.values[lowestBound])
+                let x2 = CGFloat(dateAxis[range.lowerBound].timeIntervalSince1970)
+                let y2 = CGFloat(line.values[range.lowerBound])
+                let x3 = leftDateOfCrossing
+                let y3: CGFloat = 0.0
+                let x4 = x3
+                let y4: CGFloat = 1
+                
+                let crossY = findCrossingYBetween(x1: x1, y1: y1, x2: x2, y2: y2, x3: x3, y3: y3, x4: x4, y4: y4)
+                if crossY > 0 {
+                    maxLeftY = max(maxLeftY ?? 0, crossY)
+                }
+            }
+        }
+        
+        guard let intMaxInValues = lines.compactMap({ $0.values[range].max() }).max() else {
+            return nil
+        }
+        let maxOfVisible = CGFloat(intMaxInValues)
+        
+        guard let maxInvisibleY = maxLeftY else {
+            return maxOfVisible
+        }
+        return max(maxOfVisible, maxInvisibleY)
+    }
+    
+    private func findCrossingYBetween(x1: CGFloat, y1: CGFloat, x2: CGFloat, y2: CGFloat, x3: CGFloat, y3: CGFloat, x4: CGFloat, y4: CGFloat) -> CGFloat {
+        let up = (x1*y2 - y1*x2)*(y3 - y4) - (y1-y2)*(x3*y4 - x4*y3)
+        let down = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)
+        return up/down
     }
     
     // MARK: - Touches
