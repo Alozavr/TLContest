@@ -15,6 +15,7 @@ protocol ViewControllerWithTable: class {
 }
 
 extension ViewControllerWithTable where Self: UITableViewDelegate, Self: UITableViewDataSource, Self: UIViewController {
+    
     func createTableView() {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -48,6 +49,11 @@ class ViewController: UIViewController, ViewControllerWithTable {
     weak var loadingIndicator: UIActivityIndicatorView?
     var charts = [Chart]()
     let queue = DispatchQueue(label: "TableQueue", qos: .default, attributes: DispatchQueue.Attributes.concurrent)
+    
+    override func loadView() {
+        view = UIView()
+        view.backgroundColor = .white
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
