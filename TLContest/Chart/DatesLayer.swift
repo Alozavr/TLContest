@@ -12,7 +12,7 @@ class DatesLayer: CALayer {
     
     var xAxisCoefficients: [CGFloat]
     private var titles: [Date: CATextLayer] = [:]
-    private let formatter = DateFormatter()
+    private let formatter = DateFormatters()
     
     override init(layer: Any) {
         let layer = layer as! DatesLayer
@@ -24,7 +24,6 @@ class DatesLayer: CALayer {
     
     init(xAxisCoefficients: [CGFloat], dates: [Date]) {
         self.xAxisCoefficients = xAxisCoefficients
-        formatter.dateFormat = "MMM dd"
         super.init()
         backgroundColor = UIColor.green.cgColor
         for date in dates {
@@ -37,8 +36,6 @@ class DatesLayer: CALayer {
     }
     
     override func draw(in ctx: CGContext) {
-        guard let superlayer = superlayer else { return }
-        
         if let first = titles.values.first, first.bounds.height != bounds.height {
             for title in titles.values {
                 title.bounds.size.height = bounds.height
@@ -58,14 +55,27 @@ class DatesLayer: CALayer {
     private func createTextLayer(with date: Date) -> CATextLayer {
         let size = CGSize(width: 80, height: 20)
         let textLayer = CATextLayer()
-        let string = formatter.string(from: date)
+        let string = formatter.format(date: date)
         let font = UIFont.systemFont(ofSize: 20)
         addSublayer(textLayer)
-        textLayer.font = CTFontCreateWithName(font.fontName as CFString, 20, nil)
+        textLayer.font = CTFontCreateWithName(font.fontName as CFString, 0, nil)
         textLayer.foregroundColor = UIColor.black.cgColor
         textLayer.bounds.size = size
+        textLayer.frame = CGRect(origin: CGPoint.zero, size: size)
         textLayer.alignmentMode = .center
+        textLayer.fontSize = 20
         textLayer.string = string
+        
+//        let textLayer = CATextLayer()
+//        textLayer.frame = frame
+//        textLayer.foregroundColor = color.cgColor
+//        textLayer.backgroundColor = UIColor.clear.cgColor
+//        textLayer.alignmentMode = alignment
+//        textLayer.contentsScale = UIScreen.main.scale
+//        textLayer.font = CTFontCreateWithName(font.fontName as CFString, 0, nil)
+//        textLayer.fontSize = font.pointSize
+//        textLayer.string = title
+        
         return textLayer
     }
 }
