@@ -64,8 +64,8 @@ class DetailedChartView: UIView {
         super.layoutSubviews()
         guard datesLayer.frame.isEmpty else { return }
         var frame = CGRect.zero
-        frame.origin = CGPoint(x: 0, y: bounds.height - 20)
-        frame.size = CGSize(width: bounds.width, height: 20)
+        frame.origin = CGPoint(x: chartView.frame.origin.x, y: bounds.height - 20)
+        frame.size = CGSize(width: chartView.bounds.width, height: 20)
         datesLayer.frame = frame
         datesLayer.setNeedsDisplay()
     }

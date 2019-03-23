@@ -11,13 +11,13 @@ import UIKit
 class DatesLayer: CALayer {
     
     var xAxisCoefficients: [CGFloat]
-    private var titles: [Date: CATextLayer] = [:]
+    private var titles: [CATextLayer] = []
     private let formatter = DateFormatters()
     
     override init(layer: Any) {
         let layer = layer as! DatesLayer
         self.titles = layer.titles
-//        self.formatter = layer.formatter
+//        self.formatter.dateFormat = layer.formatter.dateFormat
         self.xAxisCoefficients = layer.xAxisCoefficients
         super.init()
     }
@@ -25,9 +25,8 @@ class DatesLayer: CALayer {
     init(xAxisCoefficients: [CGFloat], dates: [Date]) {
         self.xAxisCoefficients = xAxisCoefficients
         super.init()
-        backgroundColor = UIColor.green.cgColor
         for date in dates {
-            titles[date] = createTextLayer(with: date)
+            titles.append(createTextLayer(with: date))
         }
     }
     
@@ -36,24 +35,31 @@ class DatesLayer: CALayer {
     }
     
     override func draw(in ctx: CGContext) {
-        if let first = titles.values.first, first.bounds.height != bounds.height {
-            for title in titles.values {
-                title.bounds.size.height = bounds.height
-            }
-        }
-        
         let pointsDrawn = xAxisCoefficients
             .map({ $0 * frame.width })
     
 //            .filter({ $0 + frame.origin.x >= 0 || $0 <= frame.width + frame.origin.x})
         
-        for i in zip(pointsDrawn, titles.values) {
-            i.1.frame.origin.x = i.0
+        for i in zip(pointsDrawn, titles) {
+            i.1.frame.origin.x = i.0 - i.1.bounds.width / 2
         }
+        
+        guard var previousLabel = titles.first else { return }
+        for label in titles.dropFirst() {
+            if previousLabel.frame.intersects(label.frame) {
+                if label.animation(forKey: "disapperAnimation") == nil {
+                    label.animateDisappearence(removeOnComplete: false)
+                }
+            } else {
+                if label.opacity == 0 { label.animateAppearence() }
+                previousLabel = label
+            }
+        }
+        
     }
     
     private func createTextLayer(with date: Date) -> CATextLayer {
-        let size = CGSize(width: 80, height: 20)
+        let size = CGSize(width: 50, height: 20)
         let textLayer = CATextLayer()
         let string = formatter.format(date: date)
         let font = UIFont.systemFont(ofSize: 14)
@@ -65,6 +71,8 @@ class DatesLayer: CALayer {
         textLayer.alignmentMode = .center
         textLayer.fontSize = 14
         textLayer.string = string
+//        textLayer.borderColor = UIColor.red.cgColor
+//        textLayer.borderWidth = 1
         return textLayer
     }
 }

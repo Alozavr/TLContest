@@ -110,7 +110,7 @@ class ChartOverviewCell: UITableViewCell {
             
             
             graph.datesLayer.frame.size.width = width
-            graph.datesLayer.frame.origin.x = x
+            graph.datesLayer.frame.origin.x = x + graph.chartView.frame.origin.x
             graph.datesLayer.actions = actionsToDisableMovements
             graph.datesLayer.setNeedsDisplay()
         }
