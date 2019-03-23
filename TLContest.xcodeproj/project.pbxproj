@@ -18,6 +18,7 @@
 		6C6F6352223FBC0800642CA3 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C6F6351223FBC0800642CA3 /* Theme.swift */; };
 		6CABF44C2238F68700275D86 /* DetailedChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CABF44B2238F68700275D86 /* DetailedChartView.swift */; };
 		6CABF44E2238F88F00275D86 /* RangedChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CABF44D2238F88F00275D86 /* RangedChartView.swift */; };
+		C171040C22469A8C00C2F31C /* DatesLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C171040B22469A8C00C2F31C /* DatesLayer.swift */; };
 		DD7842002244E3C60055880F /* HeightAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7841FF2244E3C60055880F /* HeightAnimator.swift */; };
 		DDE19CAC223634D2001E2C31 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE19CAB223634D2001E2C31 /* AppDelegate.swift */; };
 		DDE19CAE223634D2001E2C31 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE19CAD223634D2001E2C31 /* ViewController.swift */; };
@@ -46,6 +47,7 @@
 		6C6F6351223FBC0800642CA3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		6CABF44B2238F68700275D86 /* DetailedChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedChartView.swift; sourceTree = "<group>"; };
 		6CABF44D2238F88F00275D86 /* RangedChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangedChartView.swift; sourceTree = "<group>"; };
+		C171040B22469A8C00C2F31C /* DatesLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatesLayer.swift; sourceTree = "<group>"; };
 		DD7841FF2244E3C60055880F /* HeightAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeightAnimator.swift; sourceTree = "<group>"; };
 		DDE19CA8223634D2001E2C31 /* TLContest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TLContest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDE19CAB223634D2001E2C31 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 				6CABF44B2238F68700275D86 /* DetailedChartView.swift */,
 				6CABF44D2238F88F00275D86 /* RangedChartView.swift */,
 				DD7841FF2244E3C60055880F /* HeightAnimator.swift */,
+				C171040B22469A8C00C2F31C /* DatesLayer.swift */,
 			);
 			path = Chart;
 			sourceTree = "<group>";
@@ -232,6 +235,7 @@
 				DDE19CC22236357E001E2C31 /* Chart.swift in Sources */,
 				DD7842002244E3C60055880F /* HeightAnimator.swift in Sources */,
 				6C5230112236AEE900CEC3D4 /* UIColor+Extensions.swift in Sources */,
+				C171040C22469A8C00C2F31C /* DatesLayer.swift in Sources */,
 				6C52301B22379E9700CEC3D4 /* ChartOverview.swift in Sources */,
 				DDE19CD42237B59C001E2C31 /* LineInfoCell.swift in Sources */,
 				DDE19CC62236397D001E2C31 /* DataParser.swift in Sources */,

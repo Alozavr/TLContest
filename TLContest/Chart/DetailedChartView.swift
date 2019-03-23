@@ -12,6 +12,7 @@ class DetailedChartView: UIView {
     
     var chartView: RangedChartView!
     
+    var datesLayer: DatesLayer!
     private var tempLineLayers: [CALayer] = []
     private var cachedChart: Chart = Chart(dateAxis: [], lines: [])
     private var cachedYRange: ClosedRange<Int> = ClosedRange(uncheckedBounds: (0, 0))
@@ -54,14 +55,28 @@ class DetailedChartView: UIView {
         
         chartView.translatesAutoresizingMaskIntoConstraints = false
         
-        chartView.bindToSuperView()
+        chartView.bindToSuperView(with: UIEdgeInsets(top: 8, left: 16, bottom: 20, right: -16))
         
         self.chartView = chartView
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard datesLayer.frame.isEmpty else { return }
+        var frame = CGRect.zero
+        frame.origin = CGPoint(x: 0, y: bounds.height - 20)
+        frame.size = CGSize(width: bounds.width, height: 20)
+        datesLayer.frame = frame
+        datesLayer.setNeedsDisplay()
     }
     
     func displayChart(chart: Chart, yRange: ClosedRange<Int>) {
         showLinesAndTextIfNeeded(chart: chart, yRange: yRange)
         chartView.displayChart(chart: chart, yRange: yRange)
+        if datesLayer == nil {
+            datesLayer = DatesLayer(xAxisCoefficients: chartView.xAxisCoefficients, dates: chart.dateAxis)
+            layer.addSublayer(datesLayer)
+        }
     }
     
     // MARK: Y Lines

@@ -47,12 +47,12 @@ class ChartOverviewCell: UITableViewCell {
         
         chartView.slider.addTarget(self, action: #selector(sliderDidChangeValue), for: .valueChanged)
         
-        graph.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
-        graph.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16).isActive = true
-        graph.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16).isActive = true
-        graph.heightAnchor.constraint(equalToConstant: 200).isActive = true
+        graph.topAnchor.constraint(equalTo: topAnchor, constant: 0).isActive = true
+        graph.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0).isActive = true
+        graph.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0).isActive = true
+        graph.heightAnchor.constraint(equalToConstant: 220).isActive = true
         
-        chartView.topAnchor.constraint(equalTo: topAnchor, constant: 200 + 32).isActive = true
+        chartView.topAnchor.constraint(equalTo: topAnchor, constant: 220 + 32).isActive = true
         chartView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
         chartView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16).isActive = true
         chartView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16).isActive = true
@@ -95,7 +95,8 @@ class ChartOverviewCell: UITableViewCell {
                 "position": NSNull()
             ]
             
-            
+            let x = -graph.chartView.frame.width * floatLower * timesToIncreaseFrame
+            let width = graph.chartView.frame.width * timesToIncreaseFrame
             for lineView in lineViews {
                 var newFrame = lineView.frame
                 newFrame.origin.x = -graph.chartView.frame.width * floatLower * timesToIncreaseFrame
@@ -106,6 +107,12 @@ class ChartOverviewCell: UITableViewCell {
             //            CATransaction.commit()
             graph.displayChart(chart: chart, yRange: sliderRange())
             
+            
+            
+            graph.datesLayer.frame.size.width = width
+            graph.datesLayer.frame.origin.x = x
+            graph.datesLayer.actions = actionsToDisableMovements
+            graph.datesLayer.setNeedsDisplay()
         }
     }
 }

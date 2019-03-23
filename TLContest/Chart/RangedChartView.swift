@@ -105,7 +105,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
             view.xCoefficients = xAxisCoefficients
             view.updatePath()
             
-            
+            continue
             // MARK: - Create Date Labels
             
             removeTempLayers(inArray: tempXAxisLayers)

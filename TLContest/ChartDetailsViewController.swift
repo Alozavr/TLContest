@@ -95,7 +95,7 @@ extension ChartDetailsViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.section == 0, indexPath.row == 0 {
-            return 200 + 64 + 32 + 8
+            return 220 + 64 + 32 + 8
         } else if indexPath.section == 0 {
             return 44
         } else if indexPath.section == 1, indexPath.row == 0 {
