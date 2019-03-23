@@ -56,26 +56,15 @@ class DatesLayer: CALayer {
         let size = CGSize(width: 80, height: 20)
         let textLayer = CATextLayer()
         let string = formatter.format(date: date)
-        let font = UIFont.systemFont(ofSize: 20)
+        let font = UIFont.systemFont(ofSize: 14)
         addSublayer(textLayer)
         textLayer.font = CTFontCreateWithName(font.fontName as CFString, 0, nil)
         textLayer.foregroundColor = UIColor.black.cgColor
         textLayer.bounds.size = size
         textLayer.frame = CGRect(origin: CGPoint.zero, size: size)
         textLayer.alignmentMode = .center
-        textLayer.fontSize = 20
+        textLayer.fontSize = 14
         textLayer.string = string
-        
-//        let textLayer = CATextLayer()
-//        textLayer.frame = frame
-//        textLayer.foregroundColor = color.cgColor
-//        textLayer.backgroundColor = UIColor.clear.cgColor
-//        textLayer.alignmentMode = alignment
-//        textLayer.contentsScale = UIScreen.main.scale
-//        textLayer.font = CTFontCreateWithName(font.fontName as CFString, 0, nil)
-//        textLayer.fontSize = font.pointSize
-//        textLayer.string = title
-        
         return textLayer
     }
 }
