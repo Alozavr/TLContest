@@ -14,6 +14,9 @@ class DetailedChartView: UIView {
     
     var datesLayer: DatesLayer!
     private var tempLineLayers: [CALayer] = []
+    
+    var currentRange = ClosedRange(uncheckedBounds: (0, 0))
+    
     private var cachedChart: Chart = Chart(dateAxis: [], lines: [])
     private var cachedYRange: ClosedRange<Int> = ClosedRange(uncheckedBounds: (0, 0))
     private var cachedMax: CGFloat = 0.0
@@ -79,6 +82,7 @@ class DetailedChartView: UIView {
             datesLayer = DatesLayer(xAxisCoefficients: chartView.xAxisCoefficients, dates: chart.dateAxis)
             layer.addSublayer(datesLayer)
         }
+        self.currentRange = yRange
     }
     
     // MARK: Y Lines
@@ -92,7 +96,7 @@ class DetailedChartView: UIView {
         guard let tempmax = valuesArray.max() else { return }
         
         let max = CGFloat(tempmax)
-        let delta: CGFloat = max / 6.0
+        let delta: CGFloat = max / 100.0 * 5.0 // 5%
         if max > chartView.previousMax + delta {
             isAnimateFromTopToBottom = true
         } else if max < chartView.previousMax - delta {
@@ -111,8 +115,8 @@ class DetailedChartView: UIView {
                 layersToRemove.removeAll()
             }
             
-            for (index, layer) in tempLineLayers.reversed().enumerated() {
-                let animation = layer.getAnimationForHiddingWithDisplacement(with: 0.25,
+            for (index, layer) in layersToRemove.reversed().enumerated() {
+                let animation = layer.getAnimationForHiddingWithDisplacement(with: 0.3,
                                                                              isAnimateFromTopToBottom: !isAnimateFromTopToBottom,
                                                                              index: index - 1)
                 animation.delegate = LayerRemover(for: layer)
@@ -133,14 +137,7 @@ class DetailedChartView: UIView {
             CATransaction.commit()
         }
         
-        if !layerWithAnimationArray.contains(where: { !$0.isAnimationCompleted }) {
-            startAnimation()
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                startAnimation()
-            }
-        }
-        
+        startAnimation()
     }
     
     func addLinesAndTextsWithAnimation(chart: Chart, yRange: ClosedRange<Int>, max: CGFloat, isAnimateFromTopToBottom: Bool, withAnimation: Bool) {
@@ -180,14 +177,15 @@ class DetailedChartView: UIView {
             linePath.lineWidth = 1.0
             lineLayer.strokeColor = UIColor(hexString: "cbd3dd").withAlphaComponent(0.2).cgColor
             lineLayer.path = linePath.cgPath
+            lineLayer.contentsScale = UIScreen.main.scale
             layer.addSublayer(lineLayer)
             
             tempLineLayers.append(lineLayer)
             tempLineLayers.append(container)
             
             if withAnimation {
-                let a1 = lineLayer.getAnimatationOpacityWithPosition(with: 0.5, isAnimateFromTopToBottom: isAnimateFromTopToBottom, index: i)
-                let a2 = textLayer.getAnimatationOpacityWithPosition(with: 0.5, isAnimateFromTopToBottom: isAnimateFromTopToBottom, index: i)
+                let a1 = lineLayer.getAnimatationOpacityWithPosition(with: 0.4, isAnimateFromTopToBottom: isAnimateFromTopToBottom, index: i)
+                let a2 = textLayer.getAnimatationOpacityWithPosition(with: 0.4, isAnimateFromTopToBottom: isAnimateFromTopToBottom, index: i)
                 
                 let layerWithAnimation1 = LayerWithAnimation(layer: lineLayer, animation: a1, isAnimationCompleted: false)
                 let layerWithAnimation2 = LayerWithAnimation(layer: textLayer, animation: a2, isAnimationCompleted: false)
@@ -218,14 +216,12 @@ class DetailedChartView: UIView {
             }
         }
     }
-    
 }
 
 class LayerWithAnimation {
     let layer: CALayer
     let animation: CAAnimationGroup
     var isAnimationCompleted: Bool
-    
     init(layer: CALayer, animation: CAAnimationGroup, isAnimationCompleted: Bool) {
         self.layer = layer
         self.animation = animation
@@ -235,12 +231,10 @@ class LayerWithAnimation {
 
 class LayerRemover: NSObject, CAAnimationDelegate {
     private weak var layer: CALayer?
-    
     init(for layer: CALayer) {
         self.layer = layer
         super.init()
     }
-    
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
         self.layer?.removeFromSuperlayer()
     }

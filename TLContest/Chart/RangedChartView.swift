@@ -78,7 +78,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         let lines = chart.lines.filter { $0.isVisible }
         let willAnimate = lines.count != visibleLines.count
         self.visibleLines = lines
-        guard let tempMax = lines.compactMap({ $0.values[yRange].max() }).max()/*, let min = joinedYValues.min()*/ else { return }
+        guard let tempMax = lines.compactMap({ $0.values[yRange].max() }).max() else { return }
         var max = CGFloat(tempMax)
                 
         if max != previousMax2 && previousMax2 != 0 {
@@ -230,7 +230,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         }
         
         let minPointX: CGFloat = -2.0
-        let maxPointX = bounds.width - infoWidth
+        let maxPointX = bounds.width - infoWidth + 2
         
         drawInfo(onLayer: layer,
                  atPoint: CGPoint(x: max(min(x - infoWidth / 2.0, maxPointX), minPointX), y: 16),

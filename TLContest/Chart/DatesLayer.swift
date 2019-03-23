@@ -42,15 +42,36 @@ class DatesLayer: CALayer {
         }
         
         guard var previousLabel = titles.first else { return }
+        
+        guard let superView = superlayer?.delegate as? DetailedChartView else { return } // TODO: Delete me
+        let visibleTitles = Array(titles[superView.currentRange]) // TODO: Delete me
+        let alwaysShownLabelsAtIndexes = [(visibleTitles.count - 1) / 4, 3 * (visibleTitles.count - 1) / 4, (visibleTitles.count - 1) / 2] // TODO: Delete me
+        
         previousLabel.foregroundColor = Colors.shared.textColor.cgColor
-        for label in titles.dropFirst() {
+        for (index, label) in titles.dropFirst().enumerated() {
             label.foregroundColor = Colors.shared.textColor.cgColor
+            
+            // TODO: Delete me
+//            if superView.currentRange.contains(index),
+//                let visibleItemIndex = visibleTitles.index(ofElement: label),
+//                alwaysShownLabelsAtIndexes.contains(visibleItemIndex) {
+//                label.opacity = 1
+//
+//                if previousLabel.frame.intersects(label.frame) {
+//                    if previousLabel.animation(forKey: "disapperAnimation") == nil {
+//                        previousLabel.opacity = 0
+//                    }
+//                }
+//                previousLabel = label
+//                continue
+//            }
+            
             if previousLabel.frame.intersects(label.frame) {
                 if label.animation(forKey: "disapperAnimation") == nil {
-                    label.animateDisappearence(removeOnComplete: false)
+                    label.animateDisappearence(with: 0.15, removeOnComplete: false)
                 }
             } else {
-                if label.opacity == 0 { label.animateAppearence() }
+                if label.opacity == 0 { label.animateAppearence(with: 0.15) }
                 previousLabel = label
             }
         }
@@ -70,6 +91,7 @@ class DatesLayer: CALayer {
         textLayer.alignmentMode = .center
         textLayer.fontSize = 12
         textLayer.string = string
+        textLayer.contentsScale = UIScreen.main.scale
         return textLayer
     }
 }

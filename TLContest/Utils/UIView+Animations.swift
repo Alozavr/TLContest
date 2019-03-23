@@ -58,19 +58,24 @@ extension CALayer {
         let opacityAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.opacity))
         opacityAnimation.fromValue = 1.0
         opacityAnimation.toValue = 0.0
-        opacityAnimation.duration = duration
         
         let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.position))
         
+        var toValue = CGPoint.zero
+        
         if isAnimateFromTopToBottom {
-            pathAnimation.toValue = CGPoint(x: position.x, y: position.y - 20 * CGFloat(index + 1))
+            toValue = CGPoint(x: position.x, y: position.y - 20 * CGFloat(index + 1))
         } else {
-            pathAnimation.toValue = CGPoint(x: position.x, y: position.y + 20 * CGFloat(index + 1))
+            toValue = CGPoint(x: position.x, y: position.y + 20 * CGFloat(index + 1))
         }
         
-        pathAnimation.duration = duration
+        opacity = 0
+        position = toValue
+        
+        pathAnimation.toValue = toValue
         
         groupAnimation.animations = [pathAnimation, opacityAnimation]
+        groupAnimation.duration = duration
         
         return groupAnimation
     }
@@ -81,7 +86,6 @@ extension CALayer {
         let opacityAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.opacity))
         opacityAnimation.fromValue = 0.0
         opacityAnimation.toValue = 1.0
-        opacityAnimation.duration = duration
         
         let pathAnimation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.position))
         
@@ -91,9 +95,8 @@ extension CALayer {
             pathAnimation.fromValue = CGPoint(x: position.x, y: position.y + 20 * CGFloat(index + 1))
         }
         
-        pathAnimation.duration = duration
-        
         groupAnimation.animations = [pathAnimation, opacityAnimation]
+        groupAnimation.duration = duration
         
         return groupAnimation
     }
