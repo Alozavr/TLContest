@@ -159,18 +159,27 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
                 return true
         }
         
-        let calculatedPoints: [CGPoint] = view.calculatedPoints
+        var calculatedPoints: [CGPoint] = view.calculatedPoints
             .map({ CGPoint(x: $0.x + view.frame.origin.x, y: $0.y) })
             .filter({ $0.x >= 0.0 && $0.x <= view.frame.width - view.frame.origin.x })
         
-        guard let coeffIndex = calculatedPoints.index(where: { $0.x > location.x - delta && $0.x < location.x + delta }) else {
+        if calculatedPoints.first?.x.isZero == false {
+            calculatedPoints.insert(CGPoint(x: 0, y: -10000), at: 0)
+        }
+        
+        guard let coeffIndex = calculatedPoints.index(where: { $0.x > location.x - delta / 2.0 && $0.x < location.x + delta / 2.0 }) else {
             return true
         }
         
-        let correctRange = ClosedRange(uncheckedBounds: (max(currentRange.lowerBound, 0),
-                                                         max(currentRange.upperBound, coeffIndex)))
+        let correctRange = view.calculatedRange
         
-        let x = calculatedPoints[coeffIndex].x
+        let tempPoint = calculatedPoints[coeffIndex]
+        let x = tempPoint.x
+        let tempY = tempPoint.y
+        
+        if tempY == -10000 {
+            return true
+        }
         
         removeTempInfoLayers()
         
@@ -200,9 +209,13 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
                     return true
             }
             
-            let calculatedPoints: [CGPoint] = view.calculatedPoints
+            var calculatedPoints: [CGPoint] = view.calculatedPoints
                 .map({ CGPoint(x: $0.x + view.frame.origin.x, y: $0.y) })
                 .filter({ $0.x >= 0.0 && $0.x <= view.frame.width - view.frame.origin.x })
+            if calculatedPoints.first?.x.isZero == false {
+                calculatedPoints.insert(CGPoint(x: 0, y: -10000), at: 0)
+            }
+            
             let point = calculatedPoints[coeffIndex]
             
             let circleLayer = CAShapeLayer()
@@ -224,6 +237,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
                  withSize: infoSize,
                  date: date,
                  lines: visibleLines,
+                 range: correctRange,
                  currentValueIndex: coeffIndex)
         
         sendActions(for: .valueChanged)
@@ -272,6 +286,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
                   withSize size: CGSize,
                   date: Date,
                   lines: [Line],
+                  range: ClosedRange<Int>,
                   currentValueIndex: Int) {
         let infoLayer = CAShapeLayer()
         let rect = CGRect(origin: point, size: size)
@@ -315,7 +330,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
                                        y: insetFromTop + CGFloat(index) * lineCountHeight,
                                        width: lineCountWidth,
                                        height: lineCountHeight)
-            let lineCountText = line.values[currentValueIndex].description
+            let lineCountText = Array(line.values[range])[currentValueIndex].description
             let lineCountLayer = getLabelLayer(title: lineCountText,
                                                frame: lineCountRect,
                                                font: UIFont.boldSystemFont(ofSize: 12.0),

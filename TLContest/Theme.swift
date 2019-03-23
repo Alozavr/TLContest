@@ -155,6 +155,7 @@ extension UIView {
                 } else if let graph = subview as? DetailedChartView {
                     graph.backgroundColor = Colors.shared.primaryColor
                     graph.chartView.backgroundColor = Colors.shared.primaryColor
+                    graph.datesLayer.setNeedsDisplay()
                 }
             }
         } else if let navBar = self as? UINavigationBar {

@@ -21,6 +21,8 @@ class DetailedChartView: UIView {
     private var cachedIsBoundsUpdated: Bool = false
     private var dateFormatters = DateFormatters()
     
+    let graphViewInsets = UIEdgeInsets(top: 8, left: 16, bottom: 20, right: -16)
+    
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == #keyPath(UIView.bounds),
             let changeDict = change,
@@ -55,7 +57,7 @@ class DetailedChartView: UIView {
         
         chartView.translatesAutoresizingMaskIntoConstraints = false
         
-        chartView.bindToSuperView(with: UIEdgeInsets(top: 8, left: 16, bottom: 20, right: -16))
+        chartView.bindToSuperView(with: graphViewInsets)
         
         self.chartView = chartView
     }
@@ -144,10 +146,13 @@ class DetailedChartView: UIView {
     func addLinesAndTextsWithAnimation(chart: Chart, yRange: ClosedRange<Int>, max: CGFloat, isAnimateFromTopToBottom: Bool, withAnimation: Bool) {
         let linesCount = 5
         let yLabelInterval = max / CGFloat(linesCount)
+        
+        let spaceBetweenLines = (bounds.height - graphViewInsets.top - graphViewInsets.bottom) / CGFloat(linesCount)
+        let labelHeight: CGFloat = 20.0
+        let inset: CGFloat = 8.0
+        
         for i in 1...linesCount {
-            let y = bounds.height / CGFloat(linesCount) * CGFloat(i)
-            let labelHeight: CGFloat = 20.0
-            let inset: CGFloat = 8.0
+            let y = spaceBetweenLines * CGFloat(i)
             
             let title = String(format: "%d", Int(yLabelInterval * CGFloat(linesCount - i)))
             let labelFrame = CGRect(x: inset,

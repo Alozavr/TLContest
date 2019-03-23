@@ -20,6 +20,7 @@ class LineView: CAShapeLayer {
     }
     
     var calculatedPoints: [CGPoint] = []
+    var calculatedRange = ClosedRange(uncheckedBounds: (0, 0))
     
     func updatePath() {
         setNeedsDisplay()
@@ -65,8 +66,10 @@ class LineView: CAShapeLayer {
         if indexOfLastVisiblePoint != allPoints.endIndex - 1 {
             indexOfLastVisiblePoint += 1
         }
-
-        let points = allPoints[indexOfPreviousPoint...indexOfLastVisiblePoint]
+        
+        self.calculatedRange = indexOfPreviousPoint...indexOfLastVisiblePoint
+        let points = allPoints[calculatedRange]
+        self.calculatedPoints = Array(points)
         
         path.lineWidth = lineWidth
         strokeColor = line.color.cgColor
@@ -79,8 +82,6 @@ class LineView: CAShapeLayer {
         for point in points.dropFirst() {
             path.addLine(to: point)
         }
-        
-        self.calculatedPoints = Array(points)
         
         guard let previousPath = oldPath, shouldAnimate else {
             oldPath = path
