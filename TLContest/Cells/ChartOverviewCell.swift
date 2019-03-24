@@ -107,10 +107,10 @@ class ChartOverviewCell: UITableViewCell {
             //            CATransaction.commit()
             graph.displayChart(chart: chart, yRange: sliderRange())
             
-            
-            
-            graph.datesLayer.frame.size.width = width
-            graph.datesLayer.frame.origin.x = x + graph.chartView.frame.origin.x
+            var newFrame = graph.datesLayer.frame
+            newFrame.origin.x = x + graph.chartView.frame.origin.x
+            newFrame.size.width = width
+            graph.datesLayer.frame = newFrame
             graph.datesLayer.actions = actionsToDisableMovements
             graph.datesLayer.setNeedsDisplay()
         }

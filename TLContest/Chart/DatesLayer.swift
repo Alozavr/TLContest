@@ -38,6 +38,9 @@ class DatesLayer: CALayer {
         let pointsDrawn = xAxisCoefficients
             .map({ $0 * frame.width })
         
+        CATransaction.begin()
+        CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
+
         for (index, i) in zip(pointsDrawn, titles).enumerated() {
             if index == 0 {
                 i.1.frame.origin.x = i.0 - i.1.bounds.width / 2 + 8.0 // первый чуть двигаем вперед
@@ -47,6 +50,7 @@ class DatesLayer: CALayer {
                 i.1.frame.origin.x = i.0 - i.1.bounds.width / 2
             }
         }
+        CATransaction.commit()
         
         guard var previousLabel = titles.first else { return }
         
