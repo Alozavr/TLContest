@@ -96,7 +96,7 @@ class DetailedChartView: UIView {
         guard let tempmax = valuesArray.max() else { return }
         
         let max = CGFloat(tempmax)
-        let delta: CGFloat = max / 100.0 * 5.0 // 5%
+        let delta: CGFloat = max / 100.0 * 7.0 // 7%
         if max > chartView.previousMax + delta {
             isAnimateFromTopToBottom = true
         } else if max < chartView.previousMax - delta {
@@ -162,7 +162,7 @@ class DetailedChartView: UIView {
             let textLayer = chartView.getLabelLayer(title: title,
                                                     frame: container.bounds,
                                                     font: .systemFont(ofSize: 12.0),
-                                                    color: UIColor(hexString: "cbd3dd").withAlphaComponent(0.8),
+                                                    color: UIColor(hexString: "cbd3dd"),
                                                     alignment: .left)
             container.addSublayer(textLayer)
             layer.addSublayer(container)

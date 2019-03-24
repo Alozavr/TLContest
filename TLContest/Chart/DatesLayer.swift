@@ -13,6 +13,7 @@ class DatesLayer: CALayer {
     var xAxisCoefficients: [CGFloat]
     private var titles: [CATextLayer] = []
     private let formatter = DateFormatters()
+    private let textColor = UIColor(hexString: "cbd3dd").cgColor
     
     override init(layer: Any) {
         let layer = layer as! DatesLayer
@@ -47,9 +48,9 @@ class DatesLayer: CALayer {
         let visibleTitles = Array(titles[superView.currentRange]) // TODO: Delete me
         let alwaysShownLabelsAtIndexes = [(visibleTitles.count - 1) / 4, 3 * (visibleTitles.count - 1) / 4, (visibleTitles.count - 1) / 2] // TODO: Delete me
         
-        previousLabel.foregroundColor = Colors.shared.textColor.cgColor
+        previousLabel.foregroundColor = textColor
         for (index, label) in titles.dropFirst().enumerated() {
-            label.foregroundColor = Colors.shared.textColor.cgColor
+            label.foregroundColor = textColor
             
             // TODO: Delete me
 //            if superView.currentRange.contains(index),
@@ -85,7 +86,7 @@ class DatesLayer: CALayer {
         let font = UIFont.systemFont(ofSize: 12)
         addSublayer(textLayer)
         textLayer.font = CTFontCreateWithName(font.fontName as CFString, 0, nil)
-        textLayer.foregroundColor = Colors.shared.textColor.cgColor
+        textLayer.foregroundColor = textColor
         textLayer.bounds.size = size
         textLayer.frame = CGRect(origin: CGPoint.zero, size: size)
         textLayer.alignmentMode = .center
