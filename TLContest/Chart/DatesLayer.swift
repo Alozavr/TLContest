@@ -12,7 +12,7 @@ class DatesLayer: CALayer {
     
     var xAxisCoefficients: [CGFloat]
     private var titles: [CATextLayer] = []
-    private let formatter = DateFormatters()
+    private let formatter = DateFormatters.shared
     private let textColor = UIColor(hexString: "cbd3dd").cgColor
     
     override init(layer: Any) {
@@ -50,33 +50,13 @@ class DatesLayer: CALayer {
         
         guard var previousLabel = titles.first else { return }
         
-        guard let superView = superlayer?.delegate as? DetailedChartView else { return } // TODO: Delete me
-        let visibleTitles = Array(titles[superView.currentRange]) // TODO: Delete me
-        let alwaysShownLabelsAtIndexes = [(visibleTitles.count - 1) / 4, 3 * (visibleTitles.count - 1) / 4, (visibleTitles.count - 1) / 2] // TODO: Delete me
-        
         previousLabel.foregroundColor = textColor
-        for (index, label) in titles.dropFirst().enumerated() {
+        for label in titles.dropFirst() {
             label.foregroundColor = textColor
-            
-            // TODO: Delete me
-//            if superView.currentRange.contains(index),
-//                let visibleItemIndex = visibleTitles.index(ofElement: label),
-//                alwaysShownLabelsAtIndexes.contains(visibleItemIndex) {
-//                label.opacity = 1
-//
-//                if previousLabel.frame.intersects(label.frame) {
-//                    if previousLabel.animation(forKey: "disapperAnimation") == nil {
-//                        previousLabel.opacity = 0
-//                    }
-//                }
-//                previousLabel = label
-//                continue
-//            }
-            
             if previousLabel.frame.intersects(label.frame) {
-                if label.opacity == 1 { label.animateDisappearence(with: 0.15, removeOnComplete: false) }
+                if label.opacity == 1 { label.animateDisappearence(with: 0.1, removeOnComplete: false) }
             } else {
-                if label.opacity == 0 { label.animateAppearence(with: 0.15) }
+                if label.opacity == 0 { label.animateAppearence(with: 0.1) }
                 previousLabel = label
             }
         }
@@ -84,7 +64,6 @@ class DatesLayer: CALayer {
     }
     
     private func createTextLayer(with date: Date) -> CATextLayer {
-        
         let actionsToDisableMovements = [
             "bounds": NSNull(),
             "position": NSNull()

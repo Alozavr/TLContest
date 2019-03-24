@@ -10,6 +10,8 @@ import UIKit
 
 class DateFormatters {
     
+    static var shared: DateFormatters = DateFormatters()
+    
     lazy var monthDayDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM dd"

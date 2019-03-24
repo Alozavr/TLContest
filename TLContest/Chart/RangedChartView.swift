@@ -279,7 +279,7 @@ class RangedChartView: UIControl, HeightAnimatorDelegate {
         tempLayers.append(line)
     }
     
-    private var dateFormatters = DateFormatters()
+    private var dateFormatters = DateFormatters.shared
     
     func drawInfo(onLayer layer: CALayer,
                   atPoint point: CGPoint,

@@ -22,7 +22,7 @@ class DetailedChartView: UIView {
     private var cachedMax: CGFloat = 0.0
     private var cachedIsAnimateFromTopToBottom: Bool = false
     private var cachedIsBoundsUpdated: Bool = false
-    private var dateFormatters = DateFormatters()
+    private var dateFormatters = DateFormatters.shared
     
     let graphViewInsets = UIEdgeInsets(top: 8, left: 16, bottom: 20, right: -16)
     
