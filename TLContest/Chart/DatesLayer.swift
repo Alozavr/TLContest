@@ -74,9 +74,7 @@ class DatesLayer: CALayer {
 //            }
             
             if previousLabel.frame.intersects(label.frame) {
-                if label.animation(forKey: "disapperAnimation") == nil {
-                    label.animateDisappearence(with: 0.15, removeOnComplete: false)
-                }
+                if label.opacity == 1 { label.animateDisappearence(with: 0.15, removeOnComplete: false) }
             } else {
                 if label.opacity == 0 { label.animateAppearence(with: 0.15) }
                 previousLabel = label
