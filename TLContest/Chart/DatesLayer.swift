@@ -38,8 +38,14 @@ class DatesLayer: CALayer {
         let pointsDrawn = xAxisCoefficients
             .map({ $0 * frame.width })
         
-        for i in zip(pointsDrawn, titles) {
-            i.1.frame.origin.x = i.0 - i.1.bounds.width / 2
+        for (index, i) in zip(pointsDrawn, titles).enumerated() {
+            if index == 0 {
+                i.1.frame.origin.x = i.0 - i.1.bounds.width / 2 + 8.0 // первый чуть двигаем вперед
+            } else if index == titles.count - 1 {
+                i.1.frame.origin.x = i.0 - i.1.bounds.width / 2 - 8.0 // последний чуть двигаем вперед
+            } else {
+                i.1.frame.origin.x = i.0 - i.1.bounds.width / 2
+            }
         }
         
         guard var previousLabel = titles.first else { return }
