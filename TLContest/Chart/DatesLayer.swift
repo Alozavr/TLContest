@@ -37,9 +37,6 @@ class DatesLayer: CALayer {
     override func draw(in ctx: CGContext) {
         let pointsDrawn = xAxisCoefficients
             .map({ $0 * frame.width })
-        
-        CATransaction.begin()
-        CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
 
         for (index, i) in zip(pointsDrawn, titles).enumerated() {
             if index == 0 {
@@ -50,7 +47,6 @@ class DatesLayer: CALayer {
                 i.1.frame.origin.x = i.0 - i.1.bounds.width / 2
             }
         }
-        CATransaction.commit()
         
         guard var previousLabel = titles.first else { return }
         
@@ -90,6 +86,12 @@ class DatesLayer: CALayer {
     }
     
     private func createTextLayer(with date: Date) -> CATextLayer {
+        
+        let actionsToDisableMovements = [
+            "bounds": NSNull(),
+            "position": NSNull()
+        ]
+        
         let size = CGSize(width: 60, height: 20)
         let textLayer = CATextLayer()
         let string = formatter.format(date: date)
@@ -103,6 +105,7 @@ class DatesLayer: CALayer {
         textLayer.fontSize = 12
         textLayer.string = string
         textLayer.contentsScale = UIScreen.main.scale
+        textLayer.actions = actionsToDisableMovements
         return textLayer
     }
 }
